@@ -1,0 +1,258 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace Accardi_Alessandro_Refuge.CoucheMetier
+{
+    public class Contact
+    {
+        //                                                      Elément statique
+        static public Contact Create ( string nom, string prenom, string registreNational,
+                                string rue, string cp, string localite,
+                                string gsm, string telephoneFixe, string email )
+        {
+            return new Contact (nom, prenom, registreNational, rue, cp, localite, gsm, telephoneFixe, email);
+        }
+
+        //                                                      Elément d'instance
+
+        //Variables d'instance
+
+        private string  _nom,
+                        _prenom,
+                        _registreNational,
+                        _rue,
+                        _cp,
+                        _localite,
+                        _gsm,
+                        _telephoneFixe,
+                        _email;
+                        
+                
+        //Constructeur
+        private Contact (   string nom, string prenom, string registreNational,
+                            string rue, string cp, string localite,
+                            string gsm, string telephoneFixe, string email )
+        {
+            this.Nom                = nom;
+            this.Prenom             = prenom;
+            this.RegistreNational   = registreNational;
+
+            this.Rue        = rue;
+            this.Localite   = localite;
+            this.Cp         = cp;
+
+            this.Gsm        = gsm;
+            this.Telephone  = telephoneFixe;
+            this.Email      = email;
+
+            VerificationContact();
+
+        }
+
+        //Méthodes
+        public static string FormaterRegistreNational(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                throw new ArgumentException("Le registre national ne peut pas être vide.");
+
+            // On enlève tout sauf les chiffres
+            string digits = new string(input.Where(char.IsDigit).ToArray());
+
+            if (digits.Length != 11)
+                throw new ArgumentException("Le registre national doit contenir 11 chiffres.");
+
+            // Format officiel
+            string formate = $"{digits.Substring(0, 2)}.{digits.Substring(2, 2)}.{digits.Substring(4, 2)}-{digits.Substring(6, 3)}.{digits.Substring(9, 2)}";
+
+            // Si l'utilisateur l'a déjà entré correctement → on garde l'original
+            string resultat = input.Trim() == formate ? input.Trim() : formate;
+
+            return resultat;
+        }
+        private string ValiderGsmBelge(string input)
+        {
+            // Nettoyage : on enlève les espaces éventuels
+            string value = input.Trim();
+
+            // 1) Doit contenir exactement 10 caractères
+            bool longueurOK = value.Length == 10;
+
+            // 2) Doit contenir uniquement des chiffres
+            bool queDesChiffres = value.All(char.IsDigit);
+
+            // 3) Doit commencer par 04 (format belge classique)
+            bool commencePar04 = value.StartsWith("04");
+
+            string resultat = value;
+
+            if (!(longueurOK && queDesChiffres && commencePar04))
+                throw new ArgumentException("Le GSM doit être au format belge : 0485359516");
+
+            return resultat;
+        }
+        private string ValiderTelephoneFixeBelge(string input)
+        {
+            string value = input.Trim();
+
+            bool longueurOK = value.Length == 9;
+            bool queDesChiffres = value.All(char.IsDigit);
+            bool commencePar0 = value.StartsWith("0");
+
+            string resultat = value;
+
+            if (!(longueurOK && queDesChiffres && commencePar0))
+                throw new ArgumentException("Le téléphone fixe doit être au format belge : 021234567");
+
+            return resultat;
+        }
+        private string ValiderEmail(string input)
+        {
+            string value = input.Trim();
+
+            // Regex équivalente à la contrainte SQL
+            string pattern = @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+
+            bool emailValide = Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase);
+
+            string resultat = value;
+
+            if (!emailValide)
+                throw new ArgumentException("L'adresse email n'est pas valide.");
+
+            return resultat;
+        }
+        public void VerificationContact()
+        {
+            bool gsmOK      = !string.IsNullOrWhiteSpace(Gsm);
+            bool telOK      = !string.IsNullOrWhiteSpace(Telephone);
+            bool emailOK    = !string.IsNullOrWhiteSpace(Email);
+
+            if (!(gsmOK || telOK || emailOK))
+                throw new ArgumentException("Au moins un moyen de contact doit être renseigné : GSM, téléphone fixe ou email.");
+        }
+
+
+
+
+
+        //Propriétés
+
+        public int Identifiant {  get; set; }   
+        public string Nom 
+        { 
+            get { return this._nom; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length <= 1)
+                    throw new Exception("Le nom saisie doit avoir une longueur de minimum deux caractrès");
+
+                if (value.Any(char.IsDigit))
+                    throw new ArgumentException("Le nom ne peut pas contenir de chiffres.");
+
+                if (value.Length > 50)
+                    throw new Exception("Le nom saisi est trop long");
+
+                this._nom = value;
+
+            }
+        }
+        public string Prenom
+        {
+            get { return this._prenom; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length <= 1)
+                    throw new Exception("Le prénom saisie doit avoir une longueur de minimum deux caractrès");
+
+                if (value.Any(char.IsDigit))
+                    throw new ArgumentException("Le nom ne peut pas contenir de chiffres.");
+
+                if (value.Length > 50)
+                    throw new Exception("Le prénom saisi est trop long");
+
+                this._prenom = value;
+
+            }
+        }
+
+        public string RegistreNational
+        { 
+            get { return this._registreNational; }
+            set
+            {
+                this._registreNational = FormaterRegistreNational(value);
+            }
+        }
+        public string Rue 
+        {
+            get { return this._rue; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length <= 1)
+                    throw new Exception("Nom de rue invalide");
+
+                if (value.Length > 100)
+                    throw new Exception("Nom de rue trop long");
+
+                this._rue = value;
+            }
+        }
+        public string Localite
+        {
+            get { return this._localite; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length <= 1)
+                    throw new Exception("Nom de localité invalide");
+
+                if (value.Length > 50)
+                    throw new Exception("Nom de localité trop long");
+
+                this._localite = value;
+            }
+        }
+        public string Cp
+        {
+            get { return this._cp; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length <= 1 || !Regex.IsMatch(value, @"^\d+$"))
+                    throw new Exception("Code postale invalide");
+
+                if (value.Length > 10)
+                    throw new Exception("Code postale trop long");
+
+                this._cp = value;
+            }
+        }
+        public string Gsm
+        {
+            get { return this._gsm; }
+            set
+            {
+                this._gsm = ValiderGsmBelge(value);
+            }
+        }
+        public string Telephone
+        {
+            get
+            { return this._telephoneFixe; }
+            set
+            {
+              this._telephoneFixe = ValiderTelephoneFixeBelge(value);  
+            }
+        }
+        public string Email
+        {
+            get { return this._email; }
+            set
+            {
+                this._email = ValiderEmail(value);
+            }
+        }
+    }
+}
