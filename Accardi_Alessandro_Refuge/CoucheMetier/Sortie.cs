@@ -25,7 +25,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             get { return this._raison; }
             set
             {
-                string[] valeursAdmises = ["abandon", "errant", "deces_propriétaire", "saisie", "retour_adoption", "retour_famille_accueil"];
+                string[] valeursAdmises = ["adoption", "retour_proprietaire", "deces_animal", "famille_accueil"];
                 if (!valeursAdmises.Contains(value))
                     throw new Exception("la raison entrée n'est pas valide");
                 this._raison = value;

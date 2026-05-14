@@ -9,8 +9,24 @@ class Program
     {
         try
         {
-            // 1) Recréation de l'objet Contact existant
-            //    ⚠ Le registre national DOIT être identique à celui en base
+            // ---------------------------------------------------------
+            // 1) RECREATION DES OBJETS DE BASE (ANIMAL + CONTACT)
+            // ---------------------------------------------------------
+
+            var animal = Animal.Create(
+                nom: "Rex",
+                type: "chien",
+                sexe: "M",
+                sterilise: "oui",
+                particularite: "Très joueur",
+                description: "Chien affectueux",
+                dateDeNaissance: new DateTime(2021, 3, 15),
+                dateDeDeces: DateTime.MinValue,
+                dateDeSterilisation: new DateTime(2022, 4, 10)
+            );
+            animal.Identifiant = "21031500001"; // ⚠ Mets l'identifiant réel
+
+
             var contact = Contact.Create(
                 nom: "Dupont",
                 prenom: "Marie",
@@ -20,20 +36,57 @@ class Program
                 localite: "Liège",
                 gsm: "0485123456",
                 telephoneFixe: null,
-                email: "marie.dupont.new@example.com"
+                email: "marie.dupont@example.com"
+            );
+            contact.Identifiant = 2; // ⚠ Ton contact existant
+
+
+            // ---------------------------------------------------------
+            // 2) INSERT
+            // ---------------------------------------------------------
+
+            var fa = Famille_Accueil.Create(
+                animal: animal,
+                contact: contact,
+                date: DateTime.Today,
+                dateFin: DateTime.Today.AddDays(30) // 1 mois de FA
             );
 
-            // 2) DAO
-            var dao = new ContactDAO();
+            var dao = new Famille_AccueilDAO();
 
-            Console.WriteLine("Suppression du contact en base...");
-            await dao.DeleteAsync(contact);
+            Console.WriteLine("=== INSERT FAMILLE ACCUEIL ===");
+            await dao.InsertAsync(fa);
+            Console.WriteLine($"Insertion réussie ! ID généré : {fa.Identifiant}");
 
+            Console.WriteLine("\nAppuie sur ENTER pour continuer vers UPDATE...");
+            Console.ReadLine();
+
+
+            // ---------------------------------------------------------
+            // 3) UPDATE
+            // ---------------------------------------------------------
+
+            fa.DateFin = DateTime.Today.AddDays(45); // prolongation de 15 jours
+
+            Console.WriteLine("=== UPDATE FAMILLE ACCUEIL ===");
+            await dao.UpdateAsync(fa);
+            Console.WriteLine("Mise à jour réussie !");
+
+            Console.WriteLine("\nAppuie sur ENTER pour continuer vers DELETE...");
+            Console.ReadLine();
+
+
+            // ---------------------------------------------------------
+            // 4) DELETE
+            // ---------------------------------------------------------
+
+            Console.WriteLine("=== DELETE FAMILLE ACCUEIL ===");
+            await dao.DeleteAsync(fa);
             Console.WriteLine("Suppression réussie !");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("ERREUR lors de la suppression :");
+            Console.WriteLine("ERREUR :");
             Console.WriteLine(ex.GetType().FullName + " - " + ex.Message);
             Console.WriteLine(ex.StackTrace);
 
