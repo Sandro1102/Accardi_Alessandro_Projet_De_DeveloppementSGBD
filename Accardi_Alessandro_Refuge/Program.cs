@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Accardi_Alessandro_Refuge.CoucheMetier;
 using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
+using static Accardi_Alessandro_Refuge.CoucheBaseDeDonnees.Personne_RoleDAO;
 
 class Program
 {
@@ -10,79 +11,53 @@ class Program
         try
         {
             // ---------------------------------------------------------
-            // 1) RECREATION DES OBJETS DE BASE (ANIMAL + CONTACT)
+            // 1) RECREATION DU CONTACT MARIE DUPONT
             // ---------------------------------------------------------
-
-            var animal = Animal.Create(
-                nom: "Rex",
-                type: "chien",
-                sexe: "M",
-                sterilise: "oui",
-                particularite: "Très joueur",
-                description: "Chien affectueux",
-                dateDeNaissance: new DateTime(2021, 3, 15),
-                dateDeDeces: DateTime.MinValue,
-                dateDeSterilisation: new DateTime(2022, 4, 10)
-            );
-            animal.Identifiant = "21031500001"; // ⚠ Mets l'identifiant réel
-
 
             var contact = Contact.Create(
                 nom: "Dupont",
                 prenom: "Marie",
-                registreNational: "95061312345",
-                rue: "Rue des Lilas 25",
+                telephoneFixe: null,                         // pas de fixe
+                gsm: "0471223344",
+                email: "marie.dupont@example.com",
+                rue: "Rue des Fleurs 12",
                 cp: "4000",
                 localite: "Liège",
-                gsm: "0485123456",
-                telephoneFixe: null,
-                email: "marie.dupont@example.com"
-            );
-            contact.Identifiant = 2; // ⚠ Ton contact existant
-
-
-            // ---------------------------------------------------------
-            // 2) INSERT
-            // ---------------------------------------------------------
-
-            var fa = Famille_Accueil.Create(
-                animal: animal,
-                contact: contact,
-                date: DateTime.Today,
-                dateFin: DateTime.Today.AddDays(30) // 1 mois de FA
+                registreNational: "93052112345"          // exemple correct
             );
 
-            var dao = new Famille_AccueilDAO();
-
-            Console.WriteLine("=== INSERT FAMILLE ACCUEIL ===");
-            await dao.InsertAsync(fa);
-            Console.WriteLine($"Insertion réussie ! ID généré : {fa.Identifiant}");
-
-            Console.WriteLine("\nAppuie sur ENTER pour continuer vers UPDATE...");
-            Console.ReadLine();
+            contact.Identifiant = 2; // identifiant réel dans ta DB
 
 
             // ---------------------------------------------------------
-            // 3) UPDATE
+            // 2) INSERT D'UN ROLE POUR CE CONTACT
             // ---------------------------------------------------------
 
-            fa.DateFin = DateTime.Today.AddDays(45); // prolongation de 15 jours
+            // ⚠ Choisis un rôle existant dans ta table role (ex: id = 1 → adoptant)
+            var lien = new PersonneRole(
+                PersonneId: contact.Identifiant,
+                RoleId: 1
+            );
 
-            Console.WriteLine("=== UPDATE FAMILLE ACCUEIL ===");
-            await dao.UpdateAsync(fa);
-            Console.WriteLine("Mise à jour réussie !");
+            var dao = new Personne_RoleDAO();
+
+            Console.WriteLine("=== INSERT ROLE POUR CONTACT ===");
+            await dao.InsertAsync(lien);
+            Console.WriteLine("Insertion réussie !");
 
             Console.WriteLine("\nAppuie sur ENTER pour continuer vers DELETE...");
             Console.ReadLine();
 
 
             // ---------------------------------------------------------
-            // 4) DELETE
+            // 3) DELETE DU LIEN
             // ---------------------------------------------------------
 
-            Console.WriteLine("=== DELETE FAMILLE ACCUEIL ===");
-            await dao.DeleteAsync(fa);
+            Console.WriteLine("=== DELETE ROLE POUR CONTACT ===");
+            await dao.DeleteAsync(lien);
             Console.WriteLine("Suppression réussie !");
+
+            Console.WriteLine("\nTest terminé !");
         }
         catch (Exception ex)
         {
