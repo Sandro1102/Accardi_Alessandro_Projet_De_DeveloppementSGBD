@@ -75,53 +75,66 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
         }
         private string ValiderGsmBelge(string input)
         {
-            // Nettoyage : on enlève les espaces éventuels
-            string value = input.Trim();
+            string resultat = string.Empty;
 
-            // 1) Doit contenir exactement 10 caractères
-            bool longueurOK = value.Length == 10;
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                string value = input.Trim();
 
-            // 2) Doit contenir uniquement des chiffres
-            bool queDesChiffres = value.All(char.IsDigit);
+                bool longueurOK = value.Length == 10;
+                bool queDesChiffres = value.All(char.IsDigit);
+                bool commencePar04 = value.StartsWith("04");
 
-            // 3) Doit commencer par 04 (format belge classique)
-            bool commencePar04 = value.StartsWith("04");
+                if (!(longueurOK && queDesChiffres && commencePar04))
+                    throw new ArgumentException("Le GSM doit être au format belge : 0485359516");
 
-            string resultat = value;
-
-            if (!(longueurOK && queDesChiffres && commencePar04))
-                throw new ArgumentException("Le GSM doit être au format belge : 0485359516");
+                resultat = value;
+            }
 
             return resultat;
         }
+
         private string ValiderTelephoneFixeBelge(string input)
         {
-            string value = input.Trim();
+            string resultat = null;
 
-            bool longueurOK = value.Length == 9;
-            bool queDesChiffres = value.All(char.IsDigit);
-            bool commencePar0 = value.StartsWith("0");
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                string value = input.Trim();
+                bool longueurOK = value.Length == 9;
+                bool queDesChiffres = value.All(char.IsDigit);
+                bool commencePar0 = value.StartsWith("0");
 
-            string resultat = value;
-
-            if (!(longueurOK && queDesChiffres && commencePar0))
-                throw new ArgumentException("Le téléphone fixe doit être au format belge : 021234567");
+                if (longueurOK && queDesChiffres && commencePar0)
+                {
+                    resultat = value;
+                }
+                else
+                {
+                    throw new ArgumentException("Le téléphone fixe doit comporter 9 chiffres et commencer par 0 (ex: 041234567).");
+                }
+            }
 
             return resultat;
         }
         private string ValiderEmail(string input)
         {
-            string value = input.Trim();
+            string resultat = null;
 
-            // Regex équivalente à la contrainte SQL
-            string pattern = @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                string value = input.Trim();
+                string pattern = @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
 
-            bool emailValide = Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase);
-
-            string resultat = value;
-
-            if (!emailValide)
-                throw new ArgumentException("L'adresse email n'est pas valide.");
+                if (Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase))
+                {
+                    resultat = value;
+                }
+                else
+                {
+                    throw new ArgumentException("L'adresse email ne respecte pas le format requis (ex: contact@domaine.com).");
+                }
+            }
 
             return resultat;
         }

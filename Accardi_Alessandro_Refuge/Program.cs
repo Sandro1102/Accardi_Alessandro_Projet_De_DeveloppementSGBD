@@ -1,75 +1,47 @@
-﻿// Très important pour voir ta classe ConnexionDB (comme avec TypeScript c'est l'import)
-// ASTUCE : En tapant le nom d'une classe (ex: ConnexionDB) si elle est soulignée en rouge,
-// tu peux faire Ctrl + . (la touche contrôle et le point).
-// Visual Studio te proposera automatiquement d'ajouter le using correspondant en haut du fichier. C'est l'équivalent de l'auto-import dans VS Code !
-using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
+﻿using System;
+using System.Threading.Tasks;
 using Accardi_Alessandro_Refuge.CoucheMetier;
-using System.Collections.Generic;
-using Npgsql;
+using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
 
-
-namespace Accardi_Alessandro_Refuge
+class Program
 {
-    internal class Program
+    static async Task Main(string[] args)
     {
-        static async Task Main(string[] args)
+        try
         {
-            Console.WriteLine("=== Test du Système de Refuge ===");
+            // 1) Recréation de l'objet Contact existant
+            //    ⚠ Le registre national DOIT être identique à celui en base
+            var contact = Contact.Create(
+                nom: "Dupont",
+                prenom: "Marie",
+                registreNational: "95061312345",
+                rue: "Rue des Lilas 25",
+                cp: "4000",
+                localite: "Liège",
+                gsm: "0485123456",
+                telephoneFixe: null,
+                email: "marie.dupont.new@example.com"
+            );
 
-            // 1. Instanciation du DAO
-            AnimalDAO animalDao = new AnimalDAO();
+            // 2) DAO
+            var dao = new ContactDAO();
 
-            try
+            Console.WriteLine("Suppression du contact en base...");
+            await dao.DeleteAsync(contact);
+
+            Console.WriteLine("Suppression réussie !");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("ERREUR lors de la suppression :");
+            Console.WriteLine(ex.GetType().FullName + " - " + ex.Message);
+            Console.WriteLine(ex.StackTrace);
+
+            if (ex.InnerException != null)
             {
-                // 2. Test de récupération de tous les animaux
-                // Cette méthode va ouvrir la connexion, faire le SELECT *,
-                // et pour chaque ligne, appeler ta méthode Map().
-                Console.WriteLine("\nRécupération des animaux en base...");
-                List<Animal> mesAnimaux = await animalDao.SelectAllAsync();
-
-                if (mesAnimaux.Count == 0)
-                {
-                    Console.WriteLine("Aucun animal trouvé dans la table.");
-                }
-                else
-                {
-                    foreach (var a in mesAnimaux)
-                    {
-                        Console.WriteLine("--------------------------------------");
-                        Console.WriteLine($"ID    : {a.Identifiant}");
-                        Console.WriteLine($"Nom   : {a.Nom} ({a.Type})");
-                        Console.WriteLine($"Sexe  : {a.Sexe}");
-                        Console.WriteLine($"Sté.  : {a.Sterilise}"); // Affiche "oui" ou "non" grâce à ton getter
-                        Console.WriteLine($"Né le : {a.DateDeNaissance.ToShortDateString()}");
-
-                        if (a.DateDeDeces != DateTime.MinValue)
-                            Console.WriteLine($"Décès : {a.DateDeDeces.ToShortDateString()}");
-                    }
-                }
-
-                // 3. Test d'insertion (Optionnel)
-                /*
-                Animal nouvelAnimal = Animal.Create(
-                    "Rex", "Chien", "M", "non", 
-                    "Tache sur l'oeil", "Chien très joueur", 
-                    new DateTime(2022, 05, 10), DateTime.MinValue, DateTime.MinValue
-                );
-
-                Console.WriteLine("\nInsertion de Rex...");
-                await animalDao.InsertAsync(nouvelAnimal);
-                Console.WriteLine($"Rex a été inséré avec l'ID : {nouvelAnimal.Identifiant}");
-                */
-
+                Console.WriteLine("--- InnerException ---");
+                Console.WriteLine(ex.InnerException.GetType().FullName + " - " + ex.InnerException.Message);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"\nErreur rencontrée : {ex.Message}");
-                // Si ton Animal.Create lève une ArgumentException (ex: nom avec chiffre),
-                // elle sera rattrapée ici !
-            }
-
-            Console.WriteLine("\nAppuyez sur une touche pour quitter...");
-            Console.ReadKey();
         }
     }
 }
