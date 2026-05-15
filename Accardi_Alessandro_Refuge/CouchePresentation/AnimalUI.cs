@@ -8,9 +8,6 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 {
     internal record AnimalUI
     {
-        // -------------------------------------------------------
-        //  Pattern Singleton (instance unique, constructeur privé)
-        // -------------------------------------------------------
         public static AnimalUI Instance { get; } = new();
         private AnimalUI() { }
 
@@ -72,28 +69,32 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UN ANIMAL ===");
 
-                    string nom              = LireChaine("Nom");
-                    string type             = LireChaine("Type (chien/chat)");
-                    string sexe             = LireChaine("Sexe (M/F)");
-                    string sterilise        = LireChaine("Stérilisé (oui/non)");
-                    string particularite    = LireChaineOpt("Particularité (vide si aucune)");
-                    string description      = LireChaineOpt("Description (vide si aucune)");
-                    DateTime dateNaissance  = LireDate("Date de naissance (yyyy-MM-dd)");
-                    DateTime dateDeces      = LireDateOpt("Date de décès (vide si aucune)");
-                    DateTime dateSteril     = LireDateOpt("Date de stérilisation (vide si aucune)");
+                    string nom = AccesConsole.LireChaine("Nom");
+                    string type = AccesConsole.LireChaine("Type (chien/chat)");
+                    string sexe = AccesConsole.LireChaine("Sexe (M/F)");
+                    string sterilise = AccesConsole.LireChaine("Stérilisé (oui/non)");
+                    string particularite = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
+                    string description = AccesConsole.LireChaineOpt("Description (vide si aucune)");
+                    DateTime dateN = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
+                    DateTime dateD = AccesConsole.LireDateOpt("Date de décès (vide si aucune)");
+                    DateTime dateS = AccesConsole.LireDateOpt("Date de stérilisation (vide si aucune)");
 
-                    Animal animal = Animal.Create(nom, type, sexe, sterilise, particularite, description,dateNaissance, dateDeces, dateSteril);
+                    Animal animal = Animal.Create(
+                        nom, type, sexe, sterilise,
+                        particularite, description,
+                        dateN, dateD, dateS
+                    );
 
                     await dao.InsertAsync(animal);
 
-                    Console.WriteLine($"\nAnimal '{animal.Nom}' ajouté avec succès.");
+                    Console.WriteLine($"\nAnimal '{animal.Nom}' ajouté avec succès (ID : {animal.Identifiant}).");
                     Console.ReadKey();
                     continuer = false;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\nErreur : {ex.Message}");
-                    continuer = DemanderReessayer();
+                    continuer = AccesConsole.DemanderReessayer();
                 }
             }
         }
@@ -106,14 +107,13 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         {
             Console.Clear();
             Console.WriteLine("=== CONSULTER UN ANIMAL ===");
-            Console.Write("Connaissez-vous l'identifiant de l'animal ? (oui/non) : ");
-            string reponse = Console.ReadLine()?.Trim().ToLower();
 
-            if (reponse == "non")
+            bool connaitId = AccesConsole.Confirmation("Connaissez-vous l'identifiant de l'animal");
+
+            if (!connaitId)
                 await ListerAnimaux(dao);
 
-            Console.Write("\nEntrez l'identifiant de l'animal à consulter : ");
-            string id = Console.ReadLine()?.Trim();
+            string id = AccesConsole.DemanderId("Entrez l'identifiant de l'animal");
 
             try
             {
@@ -140,8 +140,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         {
             Console.Clear();
             Console.WriteLine("=== SUPPRIMER UN ANIMAL ===");
-            Console.Write("Entrez l'identifiant de l'animal à supprimer : ");
-            string id = Console.ReadLine()?.Trim();
+
+            string id = AccesConsole.DemanderId();
 
             try
             {
@@ -155,10 +155,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 {
                     AfficherAnimal(animal);
 
-                    Console.Write($"\nConfirmer la suppression de '{animal.Nom}' ? (oui/non) : ");
-                    string confirmation = Console.ReadLine()?.Trim().ToLower();
-
-                    if (confirmation == "oui")
+                    if (AccesConsole.Confirmation($"Confirmer la suppression de '{animal.Nom}'"))
                     {
                         await dao.DeleteAsync(animal);
                         Console.WriteLine("Animal supprimé avec succès.");
@@ -191,9 +188,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 {
                     Console.Clear();
                     Console.WriteLine("=== MODIFIER LES INFORMATIONS D'UN ANIMAL ===");
-                    Console.Write("Entrez l'identifiant de l'animal à modifier : ");
-                    string id = Console.ReadLine()?.Trim();
 
+                    string id = AccesConsole.DemanderId();
                     Animal animal = await dao.SelectByIdAsync(id);
 
                     if (animal == null)
@@ -205,8 +201,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         AfficherAnimal(animal);
 
-                        Console.WriteLine("\nQuelle information souhaitez-vous ajouter/modifier ?");
-                        Console.WriteLine("1. Particularité");
+                        Console.WriteLine("\n1. Particularité");
                         Console.WriteLine("2. Description");
                         Console.WriteLine("3. Date de décès");
                         Console.WriteLine("4. Date de stérilisation");
@@ -216,10 +211,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                         switch (choix)
                         {
-                            case 1: animal.Particularite = LireChaineOpt("Nouvelle particularité"); break;
-                            case 2: animal.Description = LireChaineOpt("Nouvelle description"); break;
-                            case 3: animal.DateDeDeces = LireDateOpt("Nouvelle date de décès (yyyy-MM-dd)"); break;
-                            case 4: animal.DateDeSterilisation = LireDateOpt("Nouvelle date de stérilisation (yyyy-MM-dd)"); break;
+                            case 1: animal.Particularite = AccesConsole.LireChaineOpt("Nouvelle particularité"); break;
+                            case 2: animal.Description = AccesConsole.LireChaineOpt("Nouvelle description"); break;
+                            case 3: animal.DateDeDeces = AccesConsole.LireDateOpt("Nouvelle date de décès"); break;
+                            case 4: animal.DateDeSterilisation = AccesConsole.LireDateOpt("Nouvelle date de stérilisation"); break;
                             default:
                                 Console.WriteLine("Choix invalide.");
                                 break;
@@ -233,7 +228,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\nErreur : {ex.Message}");
-                    continuer = DemanderReessayer();
+                    continuer = AccesConsole.DemanderReessayer();
                 }
 
                 Console.ReadKey();
@@ -254,9 +249,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 {
                     Console.Clear();
                     Console.WriteLine("=== SUPPRIMER UNE INFORMATION D'UN ANIMAL ===");
-                    Console.Write("Entrez l'identifiant de l'animal : ");
-                    string id = Console.ReadLine()?.Trim();
 
+                    string id = AccesConsole.DemanderId();
                     Animal animal = await dao.SelectByIdAsync(id);
 
                     if (animal == null)
@@ -268,8 +262,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         AfficherAnimal(animal);
 
-                        Console.WriteLine("\nQuelle information souhaitez-vous supprimer (vider) ?");
-                        Console.WriteLine("1. Particularité");
+                        Console.WriteLine("\n1. Particularité");
                         Console.WriteLine("2. Description");
                         Console.Write("Votre choix : ");
 
@@ -292,7 +285,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\nErreur : {ex.Message}");
-                    continuer = DemanderReessayer();
+                    continuer = AccesConsole.DemanderReessayer();
                 }
 
                 Console.ReadKey();
@@ -318,14 +311,25 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 }
                 else
                 {
-                    Console.WriteLine($"{"ID",-12} {"Nom",-20} {"Type",-8} {"Sexe",-6} {"Stérilisé",-10} {"Naissance",-12}");
-                    Console.WriteLine(new string('-', 72));
+                    Console.WriteLine($"{"ID",-12} {"Nom",-20} {"Type",-8} {"Sexe",-6} {"Stérilisé",-10} {"Naissance",-12} {"Décès",-12} {"Stérilisation",-15} {"Particularité",-20} {"Description",-30}");
+                    Console.WriteLine(new string('-', 150));
 
                     foreach (Animal a in animaux)
                     {
-                        string naissance = a.DateDeNaissance.ToString("yyyy-MM-dd");
-                        Console.WriteLine($"{a.Identifiant,-12} {a.Nom,-20} {a.Type,-8} {a.Sexe,-6} {a.Sterilise,-10} {naissance,-12}");
+                        Console.WriteLine(
+                            $"{a.Identifiant,-12} " +
+                            $"{a.Nom,-20} " +
+                            $"{a.Type,-8} " +
+                            $"{a.Sexe,-6} " +
+                            $"{a.Sterilise,-10} " +
+                            $"{a.DateDeNaissance:yyyy-MM-dd,-12} " +
+                            $"{(a.DateDeDeces == DateTime.MinValue ? "-" : a.DateDeDeces.ToString("yyyy-MM-dd")),-12} " +
+                            $"{(a.DateDeSterilisation == DateTime.MinValue ? "-" : a.DateDeSterilisation.ToString("yyyy-MM-dd")),-15} " +
+                            $"{(a.Particularite ?? "-"),-20} " +
+                            $"{(a.Description ?? "-"),-30}"
+                        );
                     }
+
                 }
             }
             catch (Exception ex)
@@ -338,10 +342,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         }
 
         // ============================
-        //       MÉTHODES UTILITAIRES
+        //   AFFICHAGE D'UN ANIMAL
         // ============================
 
-        // Affiche toutes les informations d'un animal
         private void AfficherAnimal(Animal animal)
         {
             Console.WriteLine();
@@ -355,84 +358,6 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine($"  Date naissance     : {animal.DateDeNaissance:yyyy-MM-dd}");
             Console.WriteLine($"  Date décès         : {(animal.DateDeDeces == DateTime.MinValue ? "-" : animal.DateDeDeces.ToString("yyyy-MM-dd"))}");
             Console.WriteLine($"  Date stérilisation : {(animal.DateDeSterilisation == DateTime.MinValue ? "-" : animal.DateDeSterilisation.ToString("yyyy-MM-dd"))}");
-        }
-
-        // Lecture d'une chaîne obligatoire
-        private string LireChaine(string libelle)
-        {
-            Console.Write($"{libelle} : ");
-            return Console.ReadLine();
-        }
-
-        // Lecture d'une chaîne optionnelle (retourne null si vide)
-        private string LireChaineOpt(string libelle)
-        {
-            Console.Write($"{libelle} : ");
-            string valeur = Console.ReadLine();
-            return string.IsNullOrWhiteSpace(valeur) ? null : valeur;
-        }
-
-        // Lecture d'une date obligatoire, boucle jusqu'à saisie valide
-        private DateTime LireDate(string libelle)
-        {
-            DateTime date = DateTime.MinValue;
-            bool valide = false;
-
-            while (!valide)
-            {
-                Console.Write($"{libelle} : ");
-                valide = DateTime.TryParse(Console.ReadLine(), out date);
-
-                if (!valide)
-                    Console.WriteLine("Format invalide. Réessayez (yyyy-MM-dd).");
-            }
-
-            return date;
-        }
-
-        // Lecture d'une date optionnelle (retourne DateTime.MinValue si vide)
-        private DateTime LireDateOpt(string libelle)
-        {
-            DateTime date = DateTime.MinValue;
-            bool valide = false;
-
-            while (!valide)
-            {
-                Console.Write($"{libelle} : ");
-                string saisie = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(saisie))
-                {
-                    valide = true;
-                }
-                else if (DateTime.TryParse(saisie, out date))
-                {
-                    valide = true;
-                }
-                else
-                {
-                    Console.WriteLine("Format invalide. Réessayez (yyyy-MM-dd) ou laissez vide.");
-                }
-            }
-
-            return date;
-        }
-
-        // Demande si l'utilisateur veut réessayer après une erreur
-        // Retourne true si oui, false sinon
-        private bool DemanderReessayer()
-        {
-            Console.Write("Voulez-vous réessayer ? (oui/non) : ");
-            string choix = Console.ReadLine()?.Trim().ToLower();
-            bool reessayer = (choix == "oui");
-
-            if (!reessayer)
-            {
-                Console.WriteLine("Retour au menu animaux.");
-                Console.ReadKey();
-            }
-
-            return reessayer;
         }
     }
 }
