@@ -48,6 +48,12 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     WHERE identifiant = @identifiant";
         }
 
+        public Task<Animal> SelectByIdAsync(string id)
+        {
+            return SelectByAsync("identifiant", id);
+        }
+
+
         protected override Animal ConvertirEnObjet(IDataReader reader)
         {
             //Extraction des données de la DB de manière sécurisée.

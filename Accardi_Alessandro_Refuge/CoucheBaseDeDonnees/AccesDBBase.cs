@@ -145,6 +145,34 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             return liste;
         }
 
+        //Création d'un SELECT permettant de cibler un enregistrement précis. Chacune des classe filles, où cela s'avère nécessaire, implémentera cette méthode
+        //Actuellement les classes Animal et Contact utiliseront cette méthode générique pour cibler un enregistrement précis.
+        protected async Task<T> SelectByAsync(string colonne, object valeur)
+        {
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE {colonne} = @valeur";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@valeur", valeur);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return ConvertirEnObjet(reader);
+                        }
+                    }
+                }
+            }
+
+            return default(T);
+        }
+
+
         //Création d'un SELECT modifiable par les classes filles afin de pouvoir récupérer, via jointure, un enregistrement venant d'une autre table.
         // Par défaut, on fait un SELECT * simple. 
         // "virtual" permet aux classes filles de redéfinir cette méthode. Rappel virutal, contrairement à abstract, permet d'être directement appelé et redéfini si nécessire.

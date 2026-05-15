@@ -40,8 +40,14 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     WHERE registre_national = @registre_national";
         }
 
-        protected override Contact ConvertirEnObjet (IDataReader reader)
+        public Task<Contact> SelectByRegistreAsync(string registre)
         {
+            return SelectByAsync("registre_national", registre);
+        }
+
+
+        protected override Contact ConvertirEnObjet (IDataReader reader)
+        { 
             string nom              =                GetStringSafe(reader, "nom");
             string prenom           =             GetStringSafe(reader, "prenom");
             string registreNational =  GetStringSafe(reader, "registre_national");
@@ -55,6 +61,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             string email            =              GetStringSafe(reader, "email");
 
             Contact receptionDBContact = Contact.Create (nom, prenom, registreNational, rue, cp, localite, gsm, telephoneFixe, email);
+            receptionDBContact.Identifiant            = reader.GetInt32(reader.GetOrdinal("contact_identifiant"));
 
             return receptionDBContact;
 
