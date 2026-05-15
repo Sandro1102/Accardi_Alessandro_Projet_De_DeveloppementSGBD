@@ -90,13 +90,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     AnimalDAO daoAnimal                     = new AnimalDAO();
                     ContactDAO daoContact                   = new ContactDAO();
-                    Famille_AccueilDAO daoFamilleAccueil    = new Famille_AccueilDAO();
 
                     Animal animal                           = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     Contact contact                         = await daoContact.SelectByRegistreAsync(identifiantContact);
-
-                    List<Famille_Accueil> listeFamilleAccueil    = await daoFamilleAccueil.SelectByAnimalAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable");
