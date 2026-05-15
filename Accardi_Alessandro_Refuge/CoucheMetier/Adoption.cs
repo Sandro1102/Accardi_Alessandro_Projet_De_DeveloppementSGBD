@@ -30,5 +30,21 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
                 this._statut = value; 
             } 
         }
+
+        public bool EstDisponiblePourAdoption(List<Adoption> adoptionsExistantes)
+        {
+            bool retVal = true;
+
+            foreach (Adoption a in adoptionsExistantes)
+            {
+                if (a.Statut == "demande" || a.Statut == "acceptee")
+                {
+                    retVal = false;
+                }
+            }
+
+            return retVal;
+        }
+
     }
 }

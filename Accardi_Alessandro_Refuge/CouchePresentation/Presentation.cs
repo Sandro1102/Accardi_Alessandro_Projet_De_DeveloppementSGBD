@@ -40,11 +40,11 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                 switch (choix)
                 {
-                    case 1: await AnimalUI.Instance.MenuAnimaux();break;
+                    case 1: await AnimalUI.Instance.MenuAnimaux();      break;
 
-                    //case 2: MenuContacts(); break;
+                    case 2: await ContactUI.Instance.MenuContacts();    break;
 
-                    //case 3: MenuAdoptions(); break;
+                    case 3: await AdoptionUI.Instance.MenuAdoptions();  break;
 
                     //case 4: MenuFamillesAccueil(); break;
 

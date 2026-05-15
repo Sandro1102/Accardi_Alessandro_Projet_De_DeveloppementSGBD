@@ -60,6 +60,39 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 JOIN contact c ON ad.adop_contact = c.contact_identifiant";
         }
 
+        public async Task<List<Adoption>> SelectByAnimalAsync(string idAnimal)
+        {
+            List<Adoption> liste = new List<Adoption>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE ani_identifiant = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idAnimal);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            liste.Add(ConvertirEnObjet(reader));
+                        }
+                    }
+                }
+            }
+
+            return liste;
+        }
+
+        public Task<Adoption> SelectByIdAsync (string id)
+        {
+            return SelectByAsync("adoption_id", id);
+        }
+
+
         protected override Adoption ConvertirEnObjet(IDataReader reader)
         {
             Animal animal = ConstruireAnimal(reader);
