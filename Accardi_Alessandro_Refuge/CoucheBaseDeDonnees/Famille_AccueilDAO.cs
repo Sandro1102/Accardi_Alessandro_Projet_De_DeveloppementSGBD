@@ -59,6 +59,56 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     JOIN contact c ON fa.fa_contact = c.contact_identifiant";
         }
 
+        public async Task<List<Famille_Accueil>> SelectByAnimalAsync(string idAnimal)
+        {
+            List<Famille_Accueil> liste = new List<Famille_Accueil>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE fa_ani_identifiant = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idAnimal);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            liste.Add(ConvertirEnObjet(reader));
+                        }
+                    }
+                }
+            }
+            return liste;
+        }
+        public async Task<List<Famille_Accueil>> SelectByIdContactlAsync(string idContact)
+        {
+            List<Famille_Accueil> liste = new List<Famille_Accueil>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE fa_contact = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idContact);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            liste.Add(ConvertirEnObjet(reader));
+                        }
+                    }
+                }
+            }
+            return liste;
+        }
         protected override Famille_Accueil ConvertirEnObjet(IDataReader reader)
         {
             Animal animal   =            ConstruireAnimal(reader);

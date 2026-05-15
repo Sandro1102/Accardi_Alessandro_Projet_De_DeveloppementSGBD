@@ -88,14 +88,15 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     string statut =
                         AccesConsole.LireChaine("Statut");
 
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    ContactDAO daoContact = new ContactDAO();
+                    AnimalDAO daoAnimal                     = new AnimalDAO();
+                    ContactDAO daoContact                   = new ContactDAO();
+                    Famille_AccueilDAO daoFamilleAccueil    = new Famille_AccueilDAO();
 
-                    Animal animal =
-                        await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                    Animal animal                           = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
-                    Contact contact =
-                        await daoContact.SelectByRegistreAsync(identifiantContact);
+                    Contact contact                         = await daoContact.SelectByRegistreAsync(identifiantContact);
+
+                    List<Famille_Accueil> listeFamilleAccueil    = await daoFamilleAccueil.SelectByAnimalAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable");
@@ -109,7 +110,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     List<Adoption> adoptionsExistantes =
                         await dao.SelectByAnimalAsync(animal.Identifiant);
 
-                    if (!adoptionAValider.EstDisponiblePourAdoption(adoptionsExistantes))
+                    if (!adoptionAValider.EstDisponiblePourAdoption(adoptionsExistantes, animal))
                     {
                         throw new Exception(
                             "Cet animal possède déjà une demande en cours ou acceptée."
