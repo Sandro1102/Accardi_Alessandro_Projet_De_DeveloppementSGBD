@@ -27,7 +27,10 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             return retVal;
         }
 
-       
+        public static bool EstDecede(DateTime? deces)
+        {
+            return deces.HasValue;
+        }
 
 
         //                                          Eléments d'instance

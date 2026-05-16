@@ -60,6 +60,43 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 JOIN contact c ON so.sortie_contact = c.contact_identifiant";
         }
 
+        private string GetSortieMax()
+        {
+            return @"
+                    SELECT date_sortie
+                    FROM ani_sortie
+                    WHERE ani_identifiant = @id
+                    ORDER BY date_sortie DESC
+                    LIMIT 1;";
+        }
+
+        public async Task<DateTime?> GetSortieMaxAsync(string identifiant)
+        {
+            DateTime? retVal = null;
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = GetSortieMax();
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", identifiant);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                            retVal = GetDateTimeSafe(reader, "date_sortie");
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+
+
         protected override Sortie ConvertirEnObjet(IDataReader reader)
         {
             Animal animal = ConstruireAnimal(reader);

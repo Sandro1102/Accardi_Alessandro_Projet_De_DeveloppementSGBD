@@ -17,7 +17,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
         public async Task MenuAnimaux()
         {
-            AnimalDAO dao = new AnimalDAO();
+            AnimalDAO animalDAO = new AnimalDAO();
+            EntreeDAO entreeDAO = new EntreeDAO();
+            SortieDAO sortieDAO = new SortieDAO();
             int choix;
 
             do
@@ -30,6 +32,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.WriteLine("4. Ajouter une information sur un animal");
                 Console.WriteLine("5. Supprimer une information sur un animal");
                 Console.WriteLine("6. Lister tous les animaux présents au refuge");
+                Console.WriteLine("7. Enregistrer un décès");
                 Console.WriteLine("0. Retour");
                 Console.WriteLine("========================");
                 Console.Write("Votre choix : ");
@@ -38,12 +41,13 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                 switch (choix)
                 {
-                    case 1: await AjouterAnimal(dao); break;
-                    case 2: await ConsulterAnimal(dao); break;
-                    case 3: await SupprimerAnimal(dao); break;
-                    case 4: await AjouterInformationAnimal(dao); break;
-                    case 5: await SupprimerInformationAnimal(dao); break;
-                    case 6: await ListerAnimaux(dao); break;
+                    case 1: await AjouterAnimal(animalDAO); break;
+                    case 2: await ConsulterAnimal(animalDAO); break;
+                    case 3: await SupprimerAnimal(animalDAO); break;
+                    case 4: await AjouterInformationAnimal(animalDAO); break;
+                    case 5: await SupprimerInformationAnimal(animalDAO); break;
+                    case 6: await ListerAnimaux(animalDAO); break;
+                    case 7: await EnregistrerDeces(animalDAO, entreeDAO, sortieDAO); break;
                     case 0: break;
                     default:
                         Console.WriteLine("Choix invalide.");
@@ -383,6 +387,92 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine($"  Date décès         : {dateDeces}");
             Console.WriteLine($"  Date stérilisation : {dateSteril}");
         }
+
+
+        //=============================================================================================================================
+        //                                                      ENREGISTRER DECES
+        //=============================================================================================================================
+
+        private async Task EnregistrerDeces(AnimalDAO animalDAO, EntreeDAO entreeDAO, SortieDAO sortieDAO)
+        {
+            string message = "Une erreur inconnue est survenue.";
+
+            try
+            {
+                Console.WriteLine("===== ENREGISTRER UN ANIMAL DECEDE =====");
+
+                string id = AccesConsole.LireChaine("Saisissez l'identifiant de l'animal");
+
+                // 1. Vérifier que l'animal existe
+                Animal? animal = await animalDAO.SelectByIdAsync(id);
+
+                if (animal == null)
+                    throw new Exception("Aucun animal trouvé avec cet identifiant.");
+
+                // 2. Récupérer entrée max et sortie max
+                DateTime? dateEntreeMax = await entreeDAO.GetEntreeMaxAsync(id);
+                DateTime? dateSortieMax = await sortieDAO.GetSortieMaxAsync(id);
+
+                if (dateEntreeMax == null)
+                    throw new Exception("Aucune entrée trouvée pour cet animal.");
+
+                // 3. Lire la date de décès
+                string saisie = AccesConsole.LireChaine("Saisissez la date de décès (JJ/MM/AAAA)");
+
+                if (!DateTime.TryParse(saisie, out DateTime dateDeces))
+                    throw new Exception("Format de date invalide.");
+
+                // 4. Vérifications logiques
+                if (dateDeces < dateEntreeMax)
+                    throw new Exception("La date de décès ne peut pas être avant la dernière entrée.");
+
+                if (dateSortieMax != null && dateDeces < dateSortieMax)
+                    throw new Exception("La date de décès ne peut pas être avant la dernière sortie.");
+
+                if (dateDeces > DateTime.Today)
+                    throw new Exception("La date de décès ne peut pas être dans le futur.");
+
+                // 5. Mise à jour de l'animal
+                animal.DateDeDeces = dateDeces;
+                await animalDAO.UpdateAsync(animal);
+
+                // 6. Affichage des contacts disponibles
+                ContactDAO daoContact = new ContactDAO();
+                List<Contact> contacts = await daoContact.SelectAllAsync();
+
+                Console.WriteLine("\n=== PERSONNES DE CONTACT DISPONIBLES ===");
+                Console.WriteLine("Registre national".PadRight(20) + " | " + "Nom".PadRight(15) + " | " + "Prénom".PadRight(15));
+                Console.WriteLine(new string('-', 55));
+
+                foreach (var c in contacts)
+                    Console.WriteLine(c.RegistreNational.PadRight(20) + " | " + c.Nom.PadRight(15) + " | " + c.Prenom.PadRight(15));
+
+                // 7. Saisie du contact
+                string registre = AccesConsole.LireChaine("Registre national du contact");
+                Contact? contact = await daoContact.SelectByRegistreAsync(registre);
+
+                if (contact == null)
+                {
+                    Console.WriteLine("\nAucun contact trouvé. Création d'un nouveau contact :");
+                    contact = await ContactUI.Instance.AjouterContact(daoContact);
+                }
+
+                // 8. Insertion dans ani_sortie
+                Sortie nouvelleSortie = Sortie.Create(animal, contact, dateDeces, "deces_animal");
+                await sortieDAO.InsertAsync(nouvelleSortie);
+
+                message = "Le décès a été enregistré avec succès.";
+            }
+            catch (Exception ex)
+            {
+                message = "Erreur : " + ex.Message;
+            }
+
+            Console.WriteLine(message);
+            Console.ReadKey();
+        }
+
+
 
         // ============================
         //   ENREGISTRER 1ÈRE ENTRÉE

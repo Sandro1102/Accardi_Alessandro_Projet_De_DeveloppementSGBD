@@ -51,7 +51,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 WHERE identifiant = @identifiant";
         }
 
-        public string GetSimilaireSQL()
+        private string GetSimilaireSQL()
         {
             return @"
                 SELECT *
@@ -62,12 +62,23 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                   AND date_sterilisation = @date_sterilisation;";
         }
 
+        private string GetDecedeSQL()
+        {
+            
+            return @"
+                     SELECT a.identifiant,a.nom,a.type,a.sexe,a.sterilise,a.particularites,a.description,a.date_naissance,a.date_deces,a.date_sterilisation,
+                     FROM animal a
+                     INNER JOIN ani_sortie s ON s.ani_identifiant = a.identifiant
+                     WHERE a.identifiant = @id
+                     ORDER BY s.date_sortie DESC
+                     LIMIT 1;";
+        }
+
         // -------------------------------------------------------
         // Recherche d'un animal identique
         // -------------------------------------------------------
 
-        public async Task<Animal?> ChercherAnimalIdentiqueAsync(
-            string nom, string type, DateTime dateNaissance, DateTime? dateSterilisation)
+        public async Task<Animal?> ChercherAnimalIdentiqueAsync(string nom, string type, DateTime dateNaissance, DateTime? dateSterilisation)
         {
             Animal? retVal = null;
 
@@ -94,6 +105,33 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
             return retVal;
         }
+
+        public async Task<Animal?> ChercherSiDecede(string identifiant)
+        {
+            Animal? retVal = null;
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                using (var cmd = new NpgsqlCommand(GetDecedeSQL(), connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", identifiant);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            retVal = ConvertirEnObjet(reader);
+                        }
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+
 
         // -------------------------------------------------------
         // Sélection par ID
