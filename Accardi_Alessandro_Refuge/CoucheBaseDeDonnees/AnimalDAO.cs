@@ -48,10 +48,54 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     WHERE identifiant = @identifiant";
         }
 
+        public string GetSimilaireSQL()
+        {
+            return @"
+                    SELECT *
+                    FROM animal
+                    WHERE nom = @nom
+                        AND type = @type
+                        AND date_naissance = @dateNaissance
+                        AND date_sterilisation = @dateSterilisation;";
+        }
+
+        public async Task<Animal?> ChercherAnimalIdentiqueAsync(string nom, string type, DateTime dateNaissance, DateTime? dateSterilisation)
+        {
+            Animal? retVal = null;
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = GetSimilaireSQL();
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@nom", nom);
+                    cmd.Parameters.AddWithValue("@type", type);
+                    cmd.Parameters.AddWithValue("@dateNaissance", dateNaissance);
+                    cmd.Parameters.AddWithValue("@dateSterilisation", dateSterilisation == DateTime.MinValue ? (object)DBNull.Value : dateSterilisation);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            retVal = ConvertirEnObjet(reader);
+                        }
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+
         public Task<Animal> SelectByIdAsync(string id)
         {
             return SelectByAsync("identifiant", id);
         }
+
+
 
 
         protected override Animal ConvertirEnObjet(IDataReader reader)
@@ -75,8 +119,8 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
             // On utilise l'opérateur ?? (null-coalescing) : si GetDateTimeSafe renvoie null, 
             // on prend DateTime.MinValue.
-            DateTime dateDeces      = GetDateTimeSafe(reader, "date_deces") ?? DateTime.MinValue;
-            DateTime dateSteril     = GetDateTimeSafe(reader, "date_sterilisation") ?? DateTime.MinValue;
+            DateTime? dateDeces     = GetDateTimeSafe(reader, "date_deces");
+            DateTime? dateSteril    = GetDateTimeSafe(reader, "date_sterilisation");
 
             // 3) Création de l'objet via ta méthode Statique Create
             // Les setters de la classe se chargeront des vérifications lié à l'objet.
@@ -139,8 +183,8 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             cmd.Parameters.AddWithValue ("@description",         objet.Description);
             cmd.Parameters.AddWithValue ("@sterilise",           objet.Sterilise == "oui"); //le test doit être réaliser, car le Get renvoie un string et non un bool.
 
-            cmd.Parameters.AddWithValue ("@date_deces",          objet.DateDeDeces           == DateTime.MinValue ? (object)DBNull.Value : objet.DateDeDeces);
-            cmd.Parameters.AddWithValue ("@date_sterilisation",  objet.DateDeSterilisation   == DateTime.MinValue ? (object)DBNull.Value : objet.DateDeSterilisation);
+            cmd.Parameters.AddWithValue ("@date_deces",          objet.DateDeDeces          ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue ("@date_sterilisation",  objet.DateDeSterilisation  ?? (object)DBNull.Value); 
             cmd.Parameters.AddWithValue ("@date_naissance",      objet.DateDeNaissance);
             
             

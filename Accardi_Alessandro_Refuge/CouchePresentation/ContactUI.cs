@@ -54,9 +54,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         //       AJOUTER CONTACT
         // ============================
 
-        private async Task AjouterContact(ContactDAO dao)
+        public async Task<Contact> AjouterContact(ContactDAO dao)
         {
             bool continuer = true;
+            Contact nouveauContact = null;
 
             while (continuer)
             {
@@ -65,19 +66,19 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UNE PERSONNE DE CONTACT ===");
 
-                    string nom      = AccesConsole.LireChaine("Nom");
-                    string prenom   = AccesConsole.LireChaine("Prénom");
-                    string rn       = AccesConsole.LireChaine("Registre national");
-                    string rue      = AccesConsole.LireChaine("Rue");
-                    string cp       = AccesConsole.LireChaine("Code postal");
+                    string nom = AccesConsole.LireChaine("Nom");
+                    string prenom = AccesConsole.LireChaine("Prénom");
+                    string rn = AccesConsole.LireChaine("Registre national");
+                    string rue = AccesConsole.LireChaine("Rue");
+                    string cp = AccesConsole.LireChaine("Code postal");
                     string localite = AccesConsole.LireChaine("Localité");
-                    string gsm      = AccesConsole.LireChaineOpt("GSM (optionnel)");
-                    string tel      = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
-                    string email    = AccesConsole.LireChaineOpt("Email (optionnel)");
+                    string gsm = AccesConsole.LireChaineOpt("GSM (optionnel)");
+                    string tel = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
+                    string email = AccesConsole.LireChaineOpt("Email (optionnel)");
 
-                    Contact c = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
+                    nouveauContact = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
 
-                    await dao.InsertAsync(c);
+                    await dao.InsertAsync(nouveauContact);
 
                     Console.WriteLine("\nContact ajouté avec succès !");
                     Console.ReadKey();
@@ -89,7 +90,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     continuer = AccesConsole.DemanderReessayer();
                 }
             }
+
+            return nouveauContact;
         }
+
 
         // ============================
         //      CONSULTER CONTACT

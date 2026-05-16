@@ -12,11 +12,23 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
         //                                          Eléments Statique
         static public Animal Create(string nom, string type, string sexe, string sterilise,
                                     string particularite, string description,
-                                    DateTime dateDeNaissance, DateTime dateDeDeces, DateTime dateDeSterilisation)
+                                    DateTime dateDeNaissance, DateTime? dateDeDeces, DateTime? dateDeSterilisation)
         {
             return new Animal(nom, type, sexe, sterilise, particularite, description,
                               dateDeNaissance, dateDeDeces, dateDeSterilisation);
         }
+
+        static public bool EstActuellementAuRefuge (DateTime dateEntreeMax, DateTime? dateSortirMax)
+        {
+            bool retVal = false;
+            if (dateEntreeMax > dateSortirMax || dateSortirMax == null) 
+                retVal = true;
+
+            return retVal;
+        }
+
+       
+
 
         //                                          Eléments d'instance
 
@@ -25,7 +37,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
         //est réellement inséré dans la table.
         private Animal(string nom, string type, string sexe, string sterilise,
                        string particularite, string description,
-                       DateTime dateDeNaissance, DateTime dateDeDeces, DateTime dateDeSterilistion)
+                       DateTime dateDeNaissance, DateTime? dateDeDeces, DateTime? dateDeSterilistion)
         {
             this.Nom                 =                  nom;
             this.Type                =                 type;
@@ -54,11 +66,26 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
 
         private List<string> _couleurs;
 
-        private DateTime    _dateDeNaissance,
-                            _dateDeDeces,
+        private DateTime    _dateDeNaissance;
+        private DateTime?   _dateDeDeces,
                             _dateDeSterilisation;
 
         // Méthodes
+        public bool EstIdentiqueA(Animal autre)
+        {
+            bool retVal = false;
+
+            if (autre != null &&
+                this.Nom == autre.Nom &&
+                this.Type == autre.Type &&
+                this.DateDeNaissance == autre.DateDeNaissance &&
+                Nullable.Equals(this.DateDeSterilisation, autre.DateDeSterilisation))
+            {
+                retVal = true;
+            }
+
+            return retVal;
+        }
         private void VerifierCohérenceSterilisation()
         {
             if (!this._sterilise && this.DateDeSterilisation != DateTime.MinValue)
@@ -196,7 +223,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             }
         }
 
-        public DateTime DateDeDeces
+        public DateTime? DateDeDeces
         {
             get { return this._dateDeDeces; }
             set
@@ -208,7 +235,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             }
         }
 
-        public DateTime DateDeSterilisation
+        public DateTime? DateDeSterilisation
         {
             get { return this._dateDeSterilisation; }
             set
