@@ -66,7 +66,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
         {
             
             return @"
-                     SELECT a.identifiant,a.nom,a.type,a.sexe,a.sterilise,a.particularites,a.description,a.date_naissance,a.date_deces,a.date_sterilisation,
+                     SELECT a.identifiant,a.nom,a.type,a.sexe,a.sterilise,a.particularites,a.description,a.date_naissance,a.date_deces,a.date_sterilisation
                      FROM animal a
                      INNER JOIN ani_sortie s ON s.ani_identifiant = a.identifiant
                      WHERE a.identifiant = @id
