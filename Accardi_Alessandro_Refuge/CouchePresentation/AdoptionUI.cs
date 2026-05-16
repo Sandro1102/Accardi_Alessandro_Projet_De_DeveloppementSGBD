@@ -76,44 +76,45 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER ADOPTION ===");
 
-                    string identifiantAnimal =
-                        AccesConsole.LireChaine("Id animal");
+                    // 1. Lire ID animal
+                    string identifiantAnimal = AccesConsole.LireChaine("Id animal");
 
-                    string identifiantContact =
-                        AccesConsole.LireChaine("Registre national du contact");
+                    // DAO nécessaires
+                    AnimalDAO daoAnimal = new AnimalDAO();
+                    ContactDAO daoContact = new ContactDAO();
 
-                    DateTime date =
-                        AccesConsole.LireDate("Date de demande (yyyy-MM-dd)");
-
-                    string statut =
-                        AccesConsole.LireChaine("Statut");
-
-                    AnimalDAO daoAnimal                     = new AnimalDAO();
-                    ContactDAO daoContact                   = new ContactDAO();
-
-                    Animal animal                           = await daoAnimal.SelectByIdAsync(identifiantAnimal);
-
-                    Contact contact                         = await daoContact.SelectByRegistreAsync(identifiantContact);
+                    // 2. Charger l’animal immédiatement
+                    Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     if (animal == null)
-                        throw new Exception("Animal introuvable");
+                        throw new Exception("Animal introuvable.");
+
+                    // 3. Vérifier décès immédiatement
+                    Animal.AnimalDecede(animal.DateDeDeces);
+
+                    // 4. Lire le reste SEULEMENT si l’animal est vivant
+                    string identifiantContact = AccesConsole.LireChaine("Registre national du contact");
+                    DateTime date = AccesConsole.LireDate("Date de demande (yyyy-MM-dd)");
+                    string statut = AccesConsole.LireChaine("Statut (demande / acceptee)");
+
+                    // 5. Charger le contact
+                    Contact contact = await daoContact.SelectByRegistreAsync(identifiantContact);
 
                     if (contact == null)
-                        throw new Exception("Contact introuvable");
+                        throw new Exception("Contact introuvable.");
 
+                    // 6. Vérifier s'il existe une adoption bloquante
+                    Adoption? adoptionExistante =
+                        await dao.RechercheDemandeAcceptee(animal.Identifiant);
+
+                    // 7. Vérifier règles métier
+                    Adoption.VerifierNouvelleDemandePossible(adoptionExistante);
+
+                    // 8. Créer l'objet adoption
                     Adoption adoptionAValider =
                         Adoption.Create(animal, contact, date, statut);
 
-                    List<Adoption> adoptionsExistantes =
-                        await dao.SelectByAnimalAsync(animal.Identifiant);
-
-                    if (!adoptionAValider.EstDisponiblePourAdoption(adoptionsExistantes, animal))
-                    {
-                        throw new Exception(
-                            "Cet animal possède déjà une demande en cours ou acceptée."
-                        );
-                    }
-
+                    // 9. Insérer
                     await dao.InsertAsync(adoptionAValider);
 
                     Console.WriteLine("\nAdoption ajoutée avec succès !");
@@ -124,11 +125,12 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 catch (Exception ex)
                 {
                     Console.WriteLine($"\nErreur : {ex.Message}");
-
                     continuer = AccesConsole.DemanderReessayer();
                 }
             }
         }
+
+
 
         // ============================
         //       MODIFIER ADOPTION

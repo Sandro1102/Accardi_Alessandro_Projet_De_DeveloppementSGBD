@@ -66,12 +66,11 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
         {
             
             return @"
-                     SELECT a.identifiant,a.nom,a.type,a.sexe,a.sterilise,a.particularites,a.description,a.date_naissance,a.date_deces,a.date_sterilisation
+                     SELECT *
                      FROM animal a
-                     INNER JOIN ani_sortie s ON s.ani_identifiant = a.identifiant
-                     WHERE a.identifiant = @id
-                     ORDER BY s.date_sortie DESC
-                     LIMIT 1;";
+                     WHERE a.identifiant = @identifiant
+                         AND a.date_deces IS NOT NULL;
+                   ";
         }
 
         // -------------------------------------------------------
@@ -116,7 +115,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
                 using (var cmd = new NpgsqlCommand(GetDecedeSQL(), connexion))
                 {
-                    cmd.Parameters.AddWithValue("@id", identifiant);
+                    cmd.Parameters.AddWithValue("@identifiant", identifiant);
 
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {

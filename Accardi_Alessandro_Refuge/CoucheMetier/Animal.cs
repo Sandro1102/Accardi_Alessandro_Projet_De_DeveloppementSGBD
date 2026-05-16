@@ -41,6 +41,12 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             return deces.HasValue;
         }
 
+        public static void AnimalDecede (DateTime? date)
+        {
+            if (EstDecede(date))
+                throw new Exception("Aucun mouvement possible pour cet animal il est malheureusement décédé");
+        }
+
 
         //                                          Eléments d'instance
 
@@ -98,7 +104,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
 
             return retVal;
         }
-        // APRÈS
+
         private void VerifierCohérenceSterilisation()
         {
             if (!this._sterilise && this._dateDeSterilisation.HasValue)
