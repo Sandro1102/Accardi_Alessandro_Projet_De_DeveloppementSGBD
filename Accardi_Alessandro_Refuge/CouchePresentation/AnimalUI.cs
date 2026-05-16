@@ -401,7 +401,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             {
                 Console.WriteLine("===== ENREGISTRER UN ANIMAL DECEDE =====");
 
-                string id = AccesConsole.LireChaine("Saisissez l'identifiant de l'animal");
+                string id = AccesConsole.DemanderId("Entrez l'identifiant de l'animal");
 
                 // 1. Vérifier que l'animal existe
                 Animal? animal = await animalDAO.SelectByIdAsync(id);

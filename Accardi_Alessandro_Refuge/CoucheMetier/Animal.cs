@@ -27,6 +27,15 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             return retVal;
         }
 
+        public static DateTime? EstEnFamilleAccueil(string statut, DateTime? date)
+        {
+            DateTime? retVal = date;
+            if (date != null && statut == "famille_accueil")
+                retVal = date.Value.AddDays(1);
+
+            return retVal;
+        }
+
         public static bool EstDecede(DateTime? deces)
         {
             return deces.HasValue;

@@ -9,6 +9,22 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
 {
     public class Adoption : Mouvement
     {
+        public static bool AdoptionEnCoursOuAcceptee(string statut)
+        {
+            return statut == "demande" || statut == "acceptee";
+        }
+
+        public static void VerifierNouvelleDemandePossible (string statut)
+        {
+            if (AdoptionEnCoursOuAcceptee(statut))
+                if (statut == "demande")
+                    throw new Exception("Demande d'adoption en cours impossible d'introduire une nouvelle demande actuellement");
+                else
+                    throw new Exception("Demande d'adoption déjà acceptee impossible d'introduire une nouvelle demande");
+
+            Console.WriteLine("Pas de demande actuellement en cours vous pouvez introduire une demande d'adoption ou l'acceptee");
+        }
+
         static public Adoption Create(Animal animal, Contact contact, DateTime date, string statut)                  { return new Adoption(0, animal, contact, date, statut); }
         static public Adoption Create(int identifiant, Animal animal, Contact contact, DateTime date, string statut) { return new Adoption(identifiant, animal, contact, date, statut); }
 
