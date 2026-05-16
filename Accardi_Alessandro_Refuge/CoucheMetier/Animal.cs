@@ -86,15 +86,16 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
 
             return retVal;
         }
+        // APRÈS
         private void VerifierCohérenceSterilisation()
         {
-            if (!this._sterilise && this.DateDeSterilisation != DateTime.MinValue)
+            if (!this._sterilise && this._dateDeSterilisation.HasValue)
                 throw new ArgumentException("Un animal non stérilisé ne peut pas avoir de date de stérilisation.");
 
-            if (this._sterilise && this.DateDeSterilisation == DateTime.MinValue)
+            if (this._sterilise && !this._dateDeSterilisation.HasValue)
                 throw new ArgumentException("Un animal stérilisé doit avoir une date de stérilisation.");
         }
-        
+
         // -------------------- Propriétés --------------------
 
         public string Identifiant
@@ -228,22 +229,23 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             get { return this._dateDeDeces; }
             set
             {
-                if (value != DateTime.MinValue && value < this.DateDeNaissance)
+                if (value.HasValue && value < this.DateDeNaissance)
                     throw new ArgumentException("La date de décès ne peut pas être avant la naissance.");
 
                 this._dateDeDeces = value;
             }
         }
 
+        // APRÈS
         public DateTime? DateDeSterilisation
         {
             get { return this._dateDeSterilisation; }
             set
             {
-                if (value != DateTime.MinValue && value < this.DateDeNaissance)
+                if (value.HasValue && value < this.DateDeNaissance)
                     throw new ArgumentException("La date de stérilisation ne peut pas être avant la naissance.");
 
-                if (this.DateDeDeces != DateTime.MinValue && value > this.DateDeDeces)
+                if (this.DateDeDeces.HasValue && value > this.DateDeDeces)
                     throw new ArgumentException("La date de stérilisation ne peut pas être après le décès.");
 
                 this._dateDeSterilisation = value;

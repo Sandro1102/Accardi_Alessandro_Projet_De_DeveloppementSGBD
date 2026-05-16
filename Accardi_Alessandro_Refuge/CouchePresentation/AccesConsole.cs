@@ -40,22 +40,35 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             }
         }
 
-        public static DateTime LireDateOpt(string libelle)
+        public static DateTime? LireDateOpt(string libelle)
         {
-            while (true)
+            DateTime? resultat = null;
+            bool valide = false;
+
+            while (!valide)
             {
                 Console.Write($"{libelle} : ");
                 string saisie = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(saisie))
-                    return DateTime.MinValue;
-
-                if (DateTime.TryParse(saisie, out DateTime date))
-                    return date;
-
-                Console.WriteLine("Format invalide. Réessayez (yyyy-MM-dd) ou laissez vide.");
+                {
+                    resultat = null;
+                    valide = true;
+                }
+                else if (DateTime.TryParse(saisie, out DateTime date))
+                {
+                    resultat = date;
+                    valide = true;
+                }
+                else
+                {
+                    Console.WriteLine("Format invalide. Réessayez (yyyy-MM-dd) ou laissez vide.");
+                }
             }
+
+            return resultat;
         }
+
 
         // ============================
         //   CONFIRMATION / REESSAI

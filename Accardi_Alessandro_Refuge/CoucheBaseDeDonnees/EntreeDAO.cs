@@ -97,9 +97,9 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
         private Contact ConstruireContact(IDataReader reader)
         {
             return Contact.Create(
-                GetStringSafe(reader, "con_registre_national"),
                 GetStringSafe(reader, "con_nom"),
                 GetStringSafe(reader, "con_prenom"),
+                GetStringSafe(reader, "con_registre_national"),
                 GetStringSafe(reader, "con_rue"),
                 GetStringSafe(reader, "con_cp"),
                 GetStringSafe(reader, "con_localite"),

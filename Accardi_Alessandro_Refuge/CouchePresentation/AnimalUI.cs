@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
 using Accardi_Alessandro_Refuge.CoucheMetier;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Accardi_Alessandro_Refuge.CouchePresentation
 {
@@ -24,27 +23,27 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             do
             {
                 Console.Clear();
-                Console.WriteLine   ("===== MENU ANIMAUX =====");
-                Console.WriteLine   ("1. Ajouter un animal");
-                Console.WriteLine   ("2. Consulter un animal");
-                Console.WriteLine   ("3. Supprimer un animal");
-                Console.WriteLine   ("4. Ajouter une information sur un animal");
-                Console.WriteLine   ("5. Supprimer une information sur un animal");
-                Console.WriteLine   ("6. Lister tous les animaux présents au refuge");
-                Console.WriteLine   ("0. Retour");
-                Console.WriteLine   ("========================");
-                Console.Write       ("Votre choix : ");
+                Console.WriteLine("===== MENU ANIMAUX =====");
+                Console.WriteLine("1. Ajouter un animal");
+                Console.WriteLine("2. Consulter un animal");
+                Console.WriteLine("3. Supprimer un animal");
+                Console.WriteLine("4. Ajouter une information sur un animal");
+                Console.WriteLine("5. Supprimer une information sur un animal");
+                Console.WriteLine("6. Lister tous les animaux présents au refuge");
+                Console.WriteLine("0. Retour");
+                Console.WriteLine("========================");
+                Console.Write("Votre choix : ");
 
                 int.TryParse(Console.ReadLine(), out choix);
 
                 switch (choix)
                 {
-                    case 1: await AjouterAnimal(dao);               break;
-                    case 2: await ConsulterAnimal(dao);             break;
-                    case 3: await SupprimerAnimal(dao);             break;
-                    case 4: await AjouterInformationAnimal(dao);    break;
-                    case 5: await SupprimerInformationAnimal(dao);  break;
-                    case 6: await ListerAnimaux(dao);               break;
+                    case 1: await AjouterAnimal(dao); break;
+                    case 2: await ConsulterAnimal(dao); break;
+                    case 3: await SupprimerAnimal(dao); break;
+                    case 4: await AjouterInformationAnimal(dao); break;
+                    case 5: await SupprimerInformationAnimal(dao); break;
+                    case 6: await ListerAnimaux(dao); break;
                     case 0: break;
                     default:
                         Console.WriteLine("Choix invalide.");
@@ -70,26 +69,25 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UN ANIMAL ===");
 
-                    string nom              = AccesConsole.LireChaine("Nom");
-                    string type             = AccesConsole.LireChaine("Type (chien/chat)");
-                    string sexe             = AccesConsole.LireChaine("Sexe (M/F)");
-                    string sterilise        = AccesConsole.LireChaine("Stérilisé (oui/non)");
-                    string particularite    = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
-                    string description      = AccesConsole.LireChaineOpt("Description (vide si aucune)");
-                    DateTime dateN          = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
-                    DateTime dateD          = AccesConsole.LireDateOpt("Date de décès (vide si aucune)");
-                    DateTime dateS          = AccesConsole.LireDateOpt("Date de stérilisation (vide si aucune)");
+                    string nom = AccesConsole.LireChaine("Nom");
+                    string type = AccesConsole.LireChaine("Type (chien/chat)");
+                    string sexe = AccesConsole.LireChaine("Sexe (M/F)");
+                    string sterilise = AccesConsole.LireChaine("Stérilisé (oui/non)");
+                    string particularite = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
+                    string description = AccesConsole.LireChaineOpt("Description (vide si aucune)");
+                    DateTime dateN = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
+                    DateTime? dateD = AccesConsole.LireDateOpt("Date de décès (vide si aucune)");
+                    DateTime? dateS = AccesConsole.LireDateOpt("Date de stérilisation (vide si aucune)");
 
-                    Animal nouveauAnimal    = Animal.Create(nom, type, sexe, sterilise,particularite, description,dateN, dateD, dateS);
+                    Animal nouveauAnimal = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
 
-                    //Vérifier s'il existe déjà dans la base
-                    Animal? animalTrouve = await dao.ChercherAnimalIdentiqueAsync (nouveauAnimal.Nom,nouveauAnimal.Type,nouveauAnimal.DateDeNaissance,nouveauAnimal.DateDeSterilisation);
+                    Animal? animalTrouve = await dao.ChercherAnimalIdentiqueAsync(nouveauAnimal.Nom, nouveauAnimal.Type, nouveauAnimal.DateDeNaissance, nouveauAnimal.DateDeSterilisation);
 
                     if (animalTrouve != null && nouveauAnimal.EstIdentiqueA(animalTrouve))
-                        throw new Exception ("\nCet animal existe déjà dans la base !");
+                        throw new Exception("\nCet animal existe déjà dans la base !");
 
+                    await EnregistrerPremiereEntree(nouveauAnimal);
                     await dao.InsertAsync(nouveauAnimal);
-                    EnregistrerPremiereEntree(nouveauAnimal);
 
                     Console.WriteLine($"\nAnimal '{nouveauAnimal.Nom}' ajouté avec succès (ID : {nouveauAnimal.Identifiant}).");
                     Console.ReadKey();
@@ -205,20 +203,20 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         AfficherAnimal(animal);
 
-                        Console.WriteLine   ("\n1. Particularité");
-                        Console.WriteLine   ("2. Description");
-                        Console.WriteLine   ("3. Date de décès");
-                        Console.WriteLine   ("4. Date de stérilisation");
-                        Console.Write       ("Votre choix : ");
+                        Console.WriteLine("\n1. Particularité");
+                        Console.WriteLine("2. Description");
+                        Console.WriteLine("3. Date de décès");
+                        Console.WriteLine("4. Date de stérilisation");
+                        Console.Write("Votre choix : ");
 
                         int.TryParse(Console.ReadLine(), out int choix);
 
                         switch (choix)
                         {
-                            case 1: animal.Particularite        = AccesConsole.LireChaineOpt("Nouvelle particularité"); break;
-                            case 2: animal.Description          = AccesConsole.LireChaineOpt("Nouvelle description"); break;
-                            case 3: animal.DateDeDeces          = AccesConsole.LireDateOpt("Nouvelle date de décès"); break;
-                            case 4: animal.DateDeSterilisation  = AccesConsole.LireDateOpt("Nouvelle date de stérilisation"); break;
+                            case 1: animal.Particularite = AccesConsole.LireChaineOpt("Nouvelle particularité"); break;
+                            case 2: animal.Description = AccesConsole.LireChaineOpt("Nouvelle description"); break;
+                            case 3: animal.DateDeDeces = AccesConsole.LireDateOpt("Nouvelle date de décès"); break;
+                            case 4: animal.DateDeSterilisation = AccesConsole.LireDateOpt("Nouvelle date de stérilisation"); break;
                             default:
                                 Console.WriteLine("Choix invalide.");
                                 break;
@@ -322,9 +320,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     foreach (Animal a in animaux)
                     {
-                        string dateNaissance    = a.DateDeNaissance.ToString("yyyy-MM-dd");
-                        string dateDeces        = a.DateDeDeces.HasValue ? a.DateDeDeces.Value.ToString("yyyy-MM-dd") : "-";
-                        string dateSteril       = a.DateDeSterilisation.HasValue? a.DateDeSterilisation.Value.ToString("yyyy-MM-dd"): "-";
+                        string dateNaissance = a.DateDeNaissance.ToString("yyyy-MM-dd");
+                        string dateDeces = a.DateDeDeces.HasValue ? a.DateDeDeces.Value.ToString("yyyy-MM-dd") : "-";
+                        string dateSteril = a.DateDeSterilisation.HasValue ? a.DateDeSterilisation.Value.ToString("yyyy-MM-dd") : "-";
 
                         Console.WriteLine(
                             $"{a.Identifiant,-12} " +
@@ -350,7 +348,6 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.ReadKey();
         }
 
-
         // ============================
         //   AFFICHAGE D'UN ANIMAL
         // ============================
@@ -367,25 +364,26 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine($"  Particularité      : {animal.Particularite ?? "-"}");
             Console.WriteLine($"  Description        : {animal.Description ?? "-"}");
 
-            string dateNaissance    = animal.DateDeNaissance.ToString("yyyy-MM-dd");
-            string dateDeces        = animal.DateDeDeces.HasValue ? animal.DateDeDeces.Value.ToString("yyyy-MM-dd"): "-";
-            string dateSteril       = animal.DateDeSterilisation.HasValue? animal.DateDeSterilisation.Value.ToString("yyyy-MM-dd"): "-";
+            string dateNaissance = animal.DateDeNaissance.ToString("yyyy-MM-dd");
+            string dateDeces = animal.DateDeDeces.HasValue ? animal.DateDeDeces.Value.ToString("yyyy-MM-dd") : "-";
+            string dateSteril = animal.DateDeSterilisation.HasValue ? animal.DateDeSterilisation.Value.ToString("yyyy-MM-dd") : "-";
 
             Console.WriteLine($"  Date naissance     : {dateNaissance}");
             Console.WriteLine($"  Date décès         : {dateDeces}");
             Console.WriteLine($"  Date stérilisation : {dateSteril}");
         }
 
+        // ============================
+        //   ENREGISTRER 1ÈRE ENTRÉE
+        // ============================
 
         private async Task EnregistrerPremiereEntree(Animal nouveauAnimal)
         {
+            // 1. Saisie de la raison — seule partie qui boucle si saisie invalide
             string raison = null;
 
             while (raison == null)
             {
-
-                // 1. Introduction de la raison d'entrée 
-
                 Console.WriteLine("\nChoisissez la raison de l'entrée :");
                 Console.WriteLine(" 1. abandon");
                 Console.WriteLine(" 2. errant");
@@ -409,53 +407,38 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                 if (raison == null)
                     Console.WriteLine("Choix invalide. Veuillez entrer un chiffre entre 1 et 6.");
-
-                //------------------------------------------------------------------------------------------
-
-                //2. Affichage de la liste des personnes de contacts
-
-                ContactDAO daoContact = new ContactDAO();
-                List<Contact> contacts = await daoContact.SelectAllAsync();
-
-                Console.WriteLine("\n=== PERSONNES DE CONTACT DISPONIBLES ===");
-                Console.WriteLine("Registre national".PadRight(20) + " | " +"Nom".PadRight(15) + " | " +"Prénom".PadRight(15));
-                Console.WriteLine(new string('-', 55));
-
-                foreach (var c in contacts)
-                {
-                    Console.WriteLine(c.RegistreNational.PadRight(20) + " | " + c.Nom.PadRight(15) + " | " + c.Prenom.PadRight(15));
-                }
-
-                //--------------------------------------------------------------------------------------------
-
-                //3. Saisie du registre national
-
-                string registre = AccesConsole.LireChaine("Registre national du contact");
-
-                //---------------------------------------------------------------------------------------------
-
-                //4. Vérification si le contact existe déjà ou non
-
-                Contact? contact = await daoContact.SelectByRegistreAsync(registre);
-
-                if (contact == null)
-                {
-                    Console.WriteLine("\nAucun contact trouvé. Création d'un nouveau contact :");
-                    contact = await ContactUI.Instance.AjouterContact(daoContact);
-                }
-
-                //--------------------------------------------------------------------------------------------
-
-                //5. Ajouter une date d'entrée
-                DateTime dateEntree = AccesConsole.LireDate("Date d'entrée (yyyy-MM-dd)");
-
-                //---------------------------------------------------------------------------------------------
-
-                //6. Dernière étape création de l'objet entrée et insertion en DB
-                Entree nouvelleEntree   = Entree.Create(nouveauAnimal, contact,dateEntree, raison);
-                EntreeDAO daoEntree     = new EntreeDAO();
-                await daoEntree.InsertAsync(nouvelleEntree);
             }
+
+            // 2. Affichage de la liste des personnes de contact
+            ContactDAO daoContact = new ContactDAO();
+            List<Contact> contacts = await daoContact.SelectAllAsync();
+
+            Console.WriteLine("\n=== PERSONNES DE CONTACT DISPONIBLES ===");
+            Console.WriteLine("Registre national".PadRight(20) + " | " + "Nom".PadRight(15) + " | " + "Prénom".PadRight(15));
+            Console.WriteLine(new string('-', 55));
+
+            foreach (var c in contacts)
+                Console.WriteLine(c.RegistreNational.PadRight(20) + " | " + c.Nom.PadRight(15) + " | " + c.Prenom.PadRight(15));
+
+            // 3. Saisie du registre national
+            string registre = AccesConsole.LireChaine("Registre national du contact");
+
+            // 4. Vérification si le contact existe déjà ou non
+            Contact? contact = await daoContact.SelectByRegistreAsync(registre);
+
+            if (contact == null)
+            {
+                Console.WriteLine("\nAucun contact trouvé. Création d'un nouveau contact :");
+                contact = await ContactUI.Instance.AjouterContact(daoContact);
+            }
+
+            // 5. Saisie de la date d'entrée
+            DateTime dateEntree = AccesConsole.LireDate("Date d'entrée (yyyy-MM-dd)");
+
+            // 6. Création de l'objet entrée et insertion en DB
+            Entree nouvelleEntree = Entree.Create(nouveauAnimal, contact, dateEntree, raison);
+            EntreeDAO daoEntree = new EntreeDAO();
+            await daoEntree.InsertAsync(nouvelleEntree);
         }
     }
 }
