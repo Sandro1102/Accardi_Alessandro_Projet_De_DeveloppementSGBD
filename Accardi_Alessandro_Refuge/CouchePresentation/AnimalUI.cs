@@ -76,8 +76,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     string particularite = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
                     string description = AccesConsole.LireChaineOpt("Description (vide si aucune)");
                     DateTime dateN = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
-                    DateTime? dateD = AccesConsole.LireDateOpt("Date de décès (vide si aucune)");
-                    DateTime? dateS = AccesConsole.LireDateOpt("Date de stérilisation (vide si aucune)");
+                    DateTime? dateD = AccesConsole.LireDateOpt("Date de décès (yyyy-MM-dd vide si aucune)");
+                    DateTime? dateS = AccesConsole.LireDateOpt("Date de stérilisation (yyyy-MM-dd vide si aucune)");
 
                     Animal nouveauAnimal = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
 
@@ -86,8 +86,19 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     if (animalTrouve != null && nouveauAnimal.EstIdentiqueA(animalTrouve))
                         throw new Exception("\nCet animal existe déjà dans la base !");
 
-                    await EnregistrerPremiereEntree(nouveauAnimal);
                     await dao.InsertAsync(nouveauAnimal);
+
+                    try
+                    {
+                        await EnregistrerPremiereEntree(nouveauAnimal);
+                    }
+                    catch
+                    {
+                        // Si l'insert dans la table entrée échoue l'animal est supprimé sinon il y a un animal orphelin dans la DB (sans raison d'entrée)
+                        await dao.DeleteAsync(nouveauAnimal);
+                        throw; //relance l’erreur pour que le catch extérieur la gère
+                    }
+
 
                     Console.WriteLine($"\nAnimal '{nouveauAnimal.Nom}' ajouté avec succès (ID : {nouveauAnimal.Identifiant}).");
                     Console.ReadKey();

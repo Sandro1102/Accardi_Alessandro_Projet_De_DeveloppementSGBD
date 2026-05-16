@@ -68,7 +68,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     string nom = AccesConsole.LireChaine("Nom");
                     string prenom = AccesConsole.LireChaine("Prénom");
-                    string rn = AccesConsole.LireChaine("Registre national");
+                    string rn = AccesConsole.LireChaine("Registre national (ex : 95.06.13-123.45)");
                     string rue = AccesConsole.LireChaine("Rue");
                     string cp = AccesConsole.LireChaine("Code postal");
                     string localite = AccesConsole.LireChaine("Localité");

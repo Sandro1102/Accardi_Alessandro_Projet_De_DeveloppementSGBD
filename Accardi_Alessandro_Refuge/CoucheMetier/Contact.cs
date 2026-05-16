@@ -54,25 +54,21 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
         }
 
         //Méthodes
-        public static string FormaterRegistreNational(string input)
+        public static string VerifierRegistreNational(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 throw new ArgumentException("Le registre national ne peut pas être vide.");
 
-            // On enlève tout sauf les chiffres
-            string digits = new string(input.Where(char.IsDigit).ToArray());
+            // Format attendu : 11 chiffres + ponctuation : xx.xx.xx-xxx.xx
+            // Exemple : 89.03.25-345.23
+            string pattern = @"^\d{2}\.\d{2}\.\d{2}-\d{3}\.\d{2}$";
 
-            if (digits.Length != 11)
-                throw new ArgumentException("Le registre national doit contenir 11 chiffres.");
+            if (!Regex.IsMatch(input, pattern))
+                throw new ArgumentException("Format invalide. Format attendu : yy.MM.dd-xxx.xx (ex : 89.03.25-345.23)");
 
-            // Format officiel
-            string formate = $"{digits.Substring(0, 2)}.{digits.Substring(2, 2)}.{digits.Substring(4, 2)}-{digits.Substring(6, 3)}.{digits.Substring(9, 2)}";
-
-            // Si l'utilisateur l'a déjà entré correctement → on garde l'original
-            string resultat = input.Trim() == formate ? input.Trim() : formate;
-
-            return resultat;
+            return input.Trim();
         }
+
         private string ValiderGsmBelge(string input)
         {
             string resultat = string.Empty;
@@ -197,7 +193,7 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             get { return this._registreNational; }
             set
             {
-                this._registreNational = FormaterRegistreNational(value);
+                this._registreNational = VerifierRegistreNational(value);
             }
         }
         public string Rue 

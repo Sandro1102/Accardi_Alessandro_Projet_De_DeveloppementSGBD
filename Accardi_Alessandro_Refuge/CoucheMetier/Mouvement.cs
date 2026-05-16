@@ -67,8 +67,8 @@ namespace Accardi_Alessandro_Refuge.CoucheMetier
             {
                 // Vérification pour éviter une date trop lointaine dans le futur
                 //J'avais fait l'erreur d'indiquer value < DateTime.Now la condition était d'office vrai puisque ce test tenait compte de l'heure !!
-                if (value > DateTime.Now.AddMonths(1) || value < DateTime.Today)
-                    throw new Exception("La date de début ne peut pas être dans un futur lointain, soit à une date antérieure à ce jour.");
+                if (value < DateTime.Today.AddMonths(-1) || value > DateTime.Today)
+                    throw new Exception("La date d'entrée doit être comprise entre aujourd'hui et un mois dans le passé maximum.");
                 this._date = value;
             }
         }

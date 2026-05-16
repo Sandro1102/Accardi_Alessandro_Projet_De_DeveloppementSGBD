@@ -182,18 +182,27 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             cmd.Parameters.AddWithValue("@sterilise", objet.Sterilise == "oui");
             cmd.Parameters.AddWithValue("@date_naissance", objet.DateDeNaissance);
 
-            var pPartic = cmd.Parameters.Add("@particularites", NpgsqlTypes.NpgsqlDbType.Varchar);
-            pPartic.Value = objet.Particularite != null ? objet.Particularite : DBNull.Value;
+            cmd.Parameters.Add("@particularites", NpgsqlTypes.NpgsqlDbType.Varchar).Value =
+                string.IsNullOrWhiteSpace(objet.Particularite)
+                    ? DBNull.Value
+                    : objet.Particularite;
 
-            var pDesc = cmd.Parameters.Add("@description", NpgsqlTypes.NpgsqlDbType.Varchar);
-            pDesc.Value = objet.Description != null ? objet.Description : DBNull.Value;
+            cmd.Parameters.Add("@description", NpgsqlTypes.NpgsqlDbType.Varchar).Value =
+                string.IsNullOrWhiteSpace(objet.Description)
+                    ? DBNull.Value
+                    : objet.Description;
 
-            var pDeces = cmd.Parameters.Add("@date_deces", NpgsqlTypes.NpgsqlDbType.Date);
-            pDeces.Value = objet.DateDeDeces.HasValue ? objet.DateDeDeces.Value : DBNull.Value;
+            cmd.Parameters.Add("@date_deces", NpgsqlTypes.NpgsqlDbType.Date).Value =
+                objet.DateDeDeces.HasValue
+                    ? objet.DateDeDeces.Value
+                    : DBNull.Value;
 
-            var pSteril = cmd.Parameters.Add("@date_sterilisation", NpgsqlTypes.NpgsqlDbType.Date);
-            pSteril.Value = objet.DateDeSterilisation.HasValue ? objet.DateDeSterilisation.Value : DBNull.Value;
+            cmd.Parameters.Add("@date_sterilisation", NpgsqlTypes.NpgsqlDbType.Date).Value =
+                objet.DateDeSterilisation.HasValue
+                    ? objet.DateDeSterilisation.Value
+                    : DBNull.Value;
         }
+
 
         // -------------------------------------------------------
         // Insertion avec génération d'identifiant
