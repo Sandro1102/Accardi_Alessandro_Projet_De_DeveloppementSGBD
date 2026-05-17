@@ -128,7 +128,10 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
         public Task<Adoption> SelectByIdAsync (string id)
         {
-            return SelectByAsync("adoption_id", id);
+            if (!int.TryParse(id, out int identifiant))
+                throw new Exception("L'identifiant doit être un nombre.");
+
+            return SelectByAsync("adoption_id", identifiant);
         }
 
 

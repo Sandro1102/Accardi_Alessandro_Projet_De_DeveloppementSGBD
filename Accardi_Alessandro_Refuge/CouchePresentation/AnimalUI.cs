@@ -57,11 +57,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
             } while (choix != 0);
         }
-
         // ============================
         //       AJOUTER UN ANIMAL
         // ============================
-
         private async Task AjouterAnimal(AnimalDAO dao)
         {
             bool continuer = true;
@@ -73,19 +71,19 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UN ANIMAL ===");
 
-                    string nom = AccesConsole.LireChaine("Nom");
-                    string type = AccesConsole.LireChaine("Type (chien/chat)");
-                    string sexe = AccesConsole.LireChaine("Sexe (M/F)");
-                    string sterilise = AccesConsole.LireChaine("Stérilisé (oui/non)");
-                    string particularite = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
-                    string description = AccesConsole.LireChaineOpt("Description (vide si aucune)");
-                    DateTime dateN = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
-                    DateTime? dateD = AccesConsole.LireDateOpt("Date de décès (yyyy-MM-dd vide si aucune)");
-                    DateTime? dateS = AccesConsole.LireDateOpt("Date de stérilisation (yyyy-MM-dd vide si aucune)");
+                    string nom              = AccesConsole.LireChaine("Nom");
+                    string type             = AccesConsole.LireChaine("Type (chien/chat)");
+                    string sexe             = AccesConsole.LireChaine("Sexe (M/F)");
+                    string sterilise        = AccesConsole.LireChaine("Stérilisé (oui/non)");
+                    string particularite    = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
+                    string description      = AccesConsole.LireChaineOpt("Description (vide si aucune)");
+                    DateTime dateN          = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
+                    DateTime? dateD         = AccesConsole.LireDateOpt("Date de décès (yyyy-MM-dd vide si aucune)");
+                    DateTime? dateS         = AccesConsole.LireDateOpt("Date de stérilisation (yyyy-MM-dd vide si aucune)");
 
-                    Animal nouveauAnimal = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
+                    Animal nouveauAnimal    = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
 
-                    Animal? animalTrouve = await dao.ChercherAnimalIdentiqueAsync(nouveauAnimal.Nom, nouveauAnimal.Type, nouveauAnimal.DateDeNaissance, nouveauAnimal.DateDeSterilisation);
+                    Animal? animalTrouve    = await dao.ChercherAnimalIdentiqueAsync(nouveauAnimal.Nom, nouveauAnimal.Type, nouveauAnimal.DateDeNaissance, nouveauAnimal.DateDeSterilisation);
 
                     if (animalTrouve != null && nouveauAnimal.EstIdentiqueA(animalTrouve))
                         throw new Exception("\nCet animal existe déjà dans la base !");
@@ -103,7 +101,6 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                         throw; //relance l’erreur pour que le catch extérieur la gère
                     }
 
-
                     Console.WriteLine($"\nAnimal '{nouveauAnimal.Nom}' ajouté avec succès (ID : {nouveauAnimal.Identifiant}).");
                     Console.ReadKey();
                     continuer = false;
@@ -115,11 +112,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 }
             }
         }
-
         // ============================
         //      CONSULTER UN ANIMAL
         // ============================
-
         private async Task ConsulterAnimal(AnimalDAO dao)
         {
             Console.Clear();
@@ -148,11 +143,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
             Console.ReadKey();
         }
-
         // ============================
         //      SUPPRIMER UN ANIMAL
         // ============================
-
         private async Task SupprimerAnimal(AnimalDAO dao)
         {
             Console.Clear();
@@ -190,11 +183,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
             Console.ReadKey();
         }
-
         // ============================
         //   AJOUTER UNE INFORMATION
         // ============================
-
         private async Task AjouterInformationAnimal(AnimalDAO dao)
         {
             bool continuer = true;
@@ -218,20 +209,20 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         AfficherAnimal(animal);
 
-                        Console.WriteLine("\n1. Particularité");
-                        Console.WriteLine("2. Description");
-                        Console.WriteLine("3. Date de décès");
-                        Console.WriteLine("4. Date de stérilisation");
-                        Console.Write("Votre choix : ");
+                        Console.WriteLine   ("\n1. Particularité");
+                        Console.WriteLine   ("2. Description");
+                        Console.WriteLine   ("3. Date de décès");
+                        Console.WriteLine   ("4. Date de stérilisation");
+                        Console.Write       ("Votre choix : ");
 
                         int.TryParse(Console.ReadLine(), out int choix);
 
                         switch (choix)
                         {
-                            case 1: animal.Particularite = AccesConsole.LireChaineOpt("Nouvelle particularité"); break;
-                            case 2: animal.Description = AccesConsole.LireChaineOpt("Nouvelle description"); break;
-                            case 3: animal.DateDeDeces = AccesConsole.LireDateOpt("Nouvelle date de décès"); break;
-                            case 4: animal.DateDeSterilisation = AccesConsole.LireDateOpt("Nouvelle date de stérilisation"); break;
+                            case 1: animal.Particularite        = AccesConsole.LireChaineOpt("Nouvelle particularité"); break;
+                            case 2: animal.Description          = AccesConsole.LireChaineOpt("Nouvelle description"); break;
+                            case 3: animal.DateDeDeces          = AccesConsole.LireDateOpt("Nouvelle date de décès"); break;
+                            case 4: animal.DateDeSterilisation  = AccesConsole.LireDateOpt("Nouvelle date de stérilisation"); break;
                             default:
                                 Console.WriteLine("Choix invalide.");
                                 break;
@@ -251,11 +242,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.ReadKey();
             }
         }
-
         // ============================
         //   SUPPRIMER UNE INFORMATION
         // ============================
-
         private async Task SupprimerInformationAnimal(AnimalDAO dao)
         {
             bool continuer = true;
@@ -279,16 +268,16 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         AfficherAnimal(animal);
 
-                        Console.WriteLine("\n1. Particularité");
-                        Console.WriteLine("2. Description");
-                        Console.Write("Votre choix : ");
+                        Console.WriteLine   ("\n1. Particularité");
+                        Console.WriteLine   ("2. Description");
+                        Console.Write       ("Votre choix : ");
 
                         int.TryParse(Console.ReadLine(), out int choix);
 
                         switch (choix)
                         {
-                            case 1: animal.Particularite = null; break;
-                            case 2: animal.Description = null; break;
+                            case 1: animal.Particularite    = null; break;
+                            case 2: animal.Description      = null; break;
                             default:
                                 Console.WriteLine("Choix invalide.");
                                 break;
@@ -308,11 +297,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.ReadKey();
             }
         }
-
         // ============================
         //       LISTER LES ANIMAUX
         // ============================
-
         private async Task ListerAnimaux(AnimalDAO dao)
         {
             Console.Clear();
@@ -328,16 +315,15 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"{"ID",-12} {"Nom",-20} {"Type",-8} {"Sexe",-6} {"Stérilisé",-10} {"Naissance",-12} {"Décès",-12} {"Stérilisation",-15} {"Particularité",-20} {"Description",-30}"
-                    );
+                    Console.WriteLine   ($"{"ID",-12} {"Nom",-20} {"Type",-8} {"Sexe",-6} {"Stérilisé",-10} " +
+                                        $"{"Naissance",-12} {"Décès",-12} {"Stérilisation",-15} {"Particularité",-20} {"Description",-30}");
                     Console.WriteLine(new string('-', 150));
 
                     foreach (Animal a in animaux)
                     {
-                        string dateNaissance = a.DateDeNaissance.ToString("yyyy-MM-dd");
-                        string dateDeces = a.DateDeDeces.HasValue ? a.DateDeDeces.Value.ToString("yyyy-MM-dd") : "-";
-                        string dateSteril = a.DateDeSterilisation.HasValue ? a.DateDeSterilisation.Value.ToString("yyyy-MM-dd") : "-";
+                        string dateNaissance    = a.DateDeNaissance.ToString("yyyy-MM-dd");
+                        string dateDeces        = a.DateDeDeces.HasValue ? a.DateDeDeces.Value.ToString("yyyy-MM-dd") : "-";
+                        string dateSteril       = a.DateDeSterilisation.HasValue ? a.DateDeSterilisation.Value.ToString("yyyy-MM-dd") : "-";
 
                         Console.WriteLine(
                             $"{a.Identifiant,-12} " +
@@ -362,11 +348,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine("\nAppuyez sur une touche pour continuer...");
             Console.ReadKey();
         }
-
         // ============================
         //   AFFICHAGE D'UN ANIMAL
         // ============================
-
         private void AfficherAnimal(Animal animal)
         {
             Console.WriteLine();
@@ -471,13 +455,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine(message);
             Console.ReadKey();
         }
-
-
-
         // ============================
         //   ENREGISTRER 1ÈRE ENTRÉE
         // ============================
-
         private async Task EnregistrerPremiereEntree(Animal nouveauAnimal)
         {
             // 1. Saisie de la raison — seule partie qui boucle si saisie invalide

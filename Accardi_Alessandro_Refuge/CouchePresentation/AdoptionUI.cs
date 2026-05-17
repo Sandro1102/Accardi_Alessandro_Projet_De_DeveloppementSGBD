@@ -120,6 +120,14 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("\nAdoption ajoutée avec succès !");
                     Console.ReadKey();
 
+                    if (adoptionAValider.Statut == "acceptee")
+                    {
+                        // 10. Création de l'objet sortie et insertion en DB
+                        Sortie nouvelleSortie = Sortie.Create(animal, contact, adoptionAValider.Date, "adoption");
+                        SortieDAO sortieDAO = new SortieDAO();
+                        await sortieDAO.InsertAsync(nouvelleSortie);
+                    }
+
                     continuer = false;
                 }
                 catch (Exception ex)
@@ -147,15 +155,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("===== MODIFIER ADOPTION =====\n");
 
-                    await ListerAdoption(dao);
+                    string cible = AccesConsole.DemanderId("\nIntroduisez l'id de l'adoption à modifier");
 
-                    string cible =
-                        AccesConsole.DemanderId(
-                            "\nIntroduisez l'id de l'adoption à modifier"
-                        );
 
-                    Adoption adoptionAModifier =
-                        await dao.SelectByIdAsync(cible);
+                    Adoption adoptionAModifier = await dao.SelectByIdAsync(cible);
 
                     if (adoptionAModifier == null)
                         throw new Exception("Adoption introuvable");
