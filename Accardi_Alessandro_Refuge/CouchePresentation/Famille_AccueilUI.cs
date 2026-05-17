@@ -26,6 +26,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.WriteLine("1. Enregistrer un départ en famille d'accueil");
                 Console.WriteLine("2. Enregistrer un retour de famille d'accueil");
                 Console.WriteLine("3. Lister les familles d'accueil");
+                Console.WriteLine("4. Lister les familles d'accueil d'un animal");
                 Console.WriteLine("0. Retour");
                 Console.WriteLine("==================================");
 
@@ -46,6 +47,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     case 3:
                         await ListerFamillesAccueil(dao);
+                        break;
+
+                    case 4:                                                        
+                        await ListerFamillesAccueilParAnimal(dao);                   
                         break;
 
                     case 0:
@@ -202,6 +207,55 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     fa =>
                         $"ID : {fa.Identifiant} | " +
                         $"Animal : {fa.AnimalConcerne.Nom} ({fa.AnimalConcerne.Identifiant}) | " +
+                        $"Contact : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
+                        $"Départ : {fa.Date:yyyy-MM-dd} | " +
+                        $"Retour : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"
+                );
+
+                Console.WriteLine();
+                Console.WriteLine("Appuyez sur une touche pour continuer...");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nErreur : {ex.Message}");
+                Console.ReadKey();
+            }
+        }
+
+        // ===================================================
+        //       LISTER FA PAR LESQUELLES UN ANIMAL EST PASSE
+        // ===================================================
+        private async Task ListerFamillesAccueilParAnimal(Famille_AccueilDAO dao)
+        {
+            try
+            {
+                Console.Clear();
+                Console.WriteLine("===== FAMILLES D'ACCUEIL PAR ANIMAL =====\n");
+
+                string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
+
+                AnimalDAO daoAnimal = new AnimalDAO();
+                Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+
+                if (animal == null)
+                    throw new Exception("Animal introuvable.");
+
+                List<Famille_Accueil> liste = await dao.SelectByAnimalAsync(animal.Identifiant);
+
+                if (liste == null || liste.Count == 0)
+                {
+                    Console.WriteLine($"\nAucune famille d'accueil trouvée pour {animal.Nom}.");
+                    Console.ReadKey();
+                    return;
+                }
+
+                Console.WriteLine($"\nFamilles d'accueil de {animal.Nom} ({animal.Identifiant}) :\n");
+
+                AccesConsole.AfficherListe(
+                    liste,
+                    fa =>
+                        $"ID : {fa.Identifiant} | " +
                         $"Contact : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
                         $"Départ : {fa.Date:yyyy-MM-dd} | " +
                         $"Retour : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"

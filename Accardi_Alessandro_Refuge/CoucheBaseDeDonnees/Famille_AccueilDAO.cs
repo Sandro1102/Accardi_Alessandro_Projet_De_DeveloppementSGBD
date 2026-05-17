@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Accardi_Alessandro_Refuge.CoucheMetier;
+using Accardi_Alessandro_Refuge.CouchePresentation;
 using Npgsql;
 
 namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
