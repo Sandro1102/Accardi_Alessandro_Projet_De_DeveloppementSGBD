@@ -24,22 +24,19 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
         {
             return $@"
                 DELETE FROM {NomDeLaTable}
-                WHERE vaccination_date = @vaccination_date
-                  AND vac_animal = @vac_animal
-                  AND id_vaccin = @id_vaccin";
+                WHERE vac_animal       = @vac_animal
+                  AND id_vaccin        = @id_vaccin
+                  AND vaccination_date = @vaccination_date";
         }
 
         protected override string GetUpdateSQL()
         {
-            // Pour une table à clé composite (vac_animal, id_vaccin, vaccination_date),
-            // l'UPDATE des clés n'est pas recommandé. Si besoin, faire DELETE + INSERT.
-            // J'ai écrit l'update, mais il est préférable d'éviter de l'utiliser
             return $@"
                 UPDATE {NomDeLaTable}
                 SET vaccination_date = @vaccination_date
-                WHERE vaccination_date = @vaccination_date
-                  AND vac_animal = @vac_animal
-                  AND id_vaccin = @id_vaccin";
+                WHERE vac_animal       = @vac_animal
+                  AND id_vaccin        = @id_vaccin
+                  AND vaccination_date = @vaccination_date";
         }
 
         protected override string GetSelectAllSQL()
@@ -57,9 +54,102 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     -- Colonnes VACCIN (vc_)
                     vc.identifiant       AS vac_identifiant, vc.nom AS vac_nom
                 FROM {NomDeLaTable} v
-                JOIN animal a ON v.vac_animal = a.identifiant
-                JOIN vaccin vc ON v.id_vaccin = vc.identifiant";
+                JOIN animal a  ON v.vac_animal = a.identifiant
+                JOIN vaccin vc ON v.id_vaccin  = vc.identifiant";
         }
+
+        // -------------------------------------------------------
+        // Retourne toutes les vaccinations d'un animal
+        // -------------------------------------------------------
+
+        public async Task<List<Vaccination>> SelectByAnimalAsync(string idAnimal)
+        {
+            List<Vaccination> liste = new List<Vaccination>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = GetSelectAllSQL() + " WHERE v.vac_animal = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idAnimal);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                            liste.Add(ConvertirEnObjet(reader));
+                    }
+                }
+            }
+
+            return liste;
+        }
+
+        // -------------------------------------------------------
+        // Vérifie si un animal a déjà reçu un vaccin ce jour-là
+        // -------------------------------------------------------
+
+        public async Task<bool> VaccinationExisteAsync(string idAnimal, int idVaccin, DateTime date)
+        {
+            bool retVal = false;
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $@"
+                    SELECT 1 FROM {NomDeLaTable}
+                    WHERE vac_animal       = @vac_animal
+                      AND id_vaccin        = @id_vaccin
+                      AND vaccination_date = @vaccination_date";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@vac_animal", idAnimal);
+                    cmd.Parameters.AddWithValue("@id_vaccin", idVaccin);
+                    cmd.Parameters.AddWithValue("@vaccination_date", date);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                            retVal = true;
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+        // -------------------------------------------------------
+        // Supprime une vaccination par animal + vaccin + date
+        // -------------------------------------------------------
+
+        public async Task SupprimerVaccinationAsync(string idAnimal, int idVaccin, DateTime date)
+        {
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $@"
+                    DELETE FROM {NomDeLaTable}
+                    WHERE vac_animal       = @vac_animal
+                      AND id_vaccin        = @id_vaccin
+                      AND vaccination_date = @vaccination_date";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@vac_animal", idAnimal);
+                    cmd.Parameters.AddWithValue("@id_vaccin", idVaccin);
+                    cmd.Parameters.AddWithValue("@vaccination_date", date);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        // -------------------------------------------------------
 
         protected override Vaccination ConvertirEnObjet(IDataReader reader)
         {
@@ -83,11 +173,12 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 GetStringSafe(reader, "ani_particularites"),
                 GetStringSafe(reader, "ani_description"),
                 GetValueOrDefault<DateTime>(reader, "ani_date_naissance"),
-                GetDateTimeSafe(reader, "ani_date_deces") ?? DateTime.MinValue,
-                GetDateTimeSafe(reader, "ani_date_sterilisation") ?? DateTime.MinValue
+                GetDateTimeSafe(reader, "ani_date_deces"),          
+                GetDateTimeSafe(reader, "ani_date_sterilisation")   
             );
 
             animal.Identifiant = GetStringSafe(reader, "ani_identifiant");
+
             return animal;
         }
 
@@ -95,15 +186,16 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
         private Vaccin ConstruireVaccin(IDataReader reader)
         {
-            // Utilise la factory Vaccin.Create(int id, string nom)
             int id = GetValueOrDefault<int>(reader, "vac_identifiant");
             string nom = GetStringSafe(reader, "vac_nom");
+
             return Vaccin.Create(id, nom);
         }
 
+        // -------------------------------------------------------
+
         protected override void AssignerParametreSQL(NpgsqlCommand cmd, Vaccination objet)
         {
-            // clé composite : vaccination_date + vac_animal + id_vaccin
             cmd.Parameters.AddWithValue("@vaccination_date", objet.DateVaccination);
             cmd.Parameters.AddWithValue("@vac_animal", objet.AnimalConcerne.Identifiant);
             cmd.Parameters.AddWithValue("@id_vaccin", objet.VaccinApplique.Identifiant);

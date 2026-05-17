@@ -48,7 +48,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     case 4: await Famille_AccueilUI.Instance.MenuFamilleAccueil();  break;
 
-                    //case 5: MenuVaccins(); break;
+                    case 5: await VaccinationUI.Instance.MenuVaccinations();        break;
 
                     case 0:
                         Console.WriteLine("Fermeture de l'application");
