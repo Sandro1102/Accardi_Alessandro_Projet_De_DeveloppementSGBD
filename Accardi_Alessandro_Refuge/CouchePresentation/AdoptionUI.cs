@@ -30,24 +30,15 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.WriteLine("0. Retour");
                 Console.WriteLine("==========================");
 
-                int.TryParse(
-                    AccesConsole.LireChaine("Votre choix"),
-                    out choix
-                );
+                int.TryParse(AccesConsole.LireChaine("Votre choix"),out choix);
 
                 switch (choix)
                 {
-                    case 1:
-                        await AjouterAdoption(dao);
-                        break;
+                    case 1:await AjouterAdoption(dao);  break;
 
-                    case 2:
-                        await ModifierAdoption(dao);
-                        break;
+                    case 2:await ModifierAdoption(dao); break;
 
-                    case 3:
-                        await ListerAdoption(dao);
-                        break;
+                    case 3:await ListerAdoption(dao);   break;
 
                     case 0:
                         break;
@@ -80,8 +71,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     string identifiantAnimal = AccesConsole.LireChaine("Id animal");
 
                     // DAO nécessaires
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    ContactDAO daoContact = new ContactDAO();
+                    AnimalDAO   daoAnimal   = new AnimalDAO();
+                    ContactDAO  daoContact  = new ContactDAO();
 
                     // 2. Charger l’animal immédiatement
                     Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
@@ -93,26 +84,24 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Animal.AnimalDecede(animal.DateDeDeces);
 
                     // 4. Lire le reste SEULEMENT si l’animal est vivant
-                    string identifiantContact = AccesConsole.LireChaine("Registre national du contact");
-                    DateTime date = AccesConsole.LireDate("Date de demande (yyyy-MM-dd)");
-                    string statut = AccesConsole.LireChaine("Statut (demande / acceptee)");
+                    string      identifiantContact  = AccesConsole.LireChaine("Registre national du contact");
+                    DateTime    date                = AccesConsole.LireDate("Date de demande (yyyy-MM-dd)");
+                    string      statut              = AccesConsole.LireChaine("Statut (demande / acceptee)");
 
                     // 5. Charger le contact
-                    Contact contact = await daoContact.SelectByRegistreAsync(identifiantContact);
+                    Contact     contact             = await daoContact.SelectByRegistreAsync(identifiantContact);
 
                     if (contact == null)
                         throw new Exception("Contact introuvable.");
 
                     // 6. Vérifier s'il existe une adoption bloquante
-                    Adoption? adoptionExistante =
-                        await dao.RechercheDemandeAcceptee(animal.Identifiant);
+                    Adoption? adoptionExistante     = await dao.RechercheDemandeAcceptee(animal.Identifiant);
 
                     // 7. Vérifier règles métier
                     Adoption.VerifierNouvelleDemandePossible(adoptionExistante);
 
                     // 8. Créer l'objet adoption
-                    Adoption adoptionAValider =
-                        Adoption.Create(animal, contact, date, statut);
+                    Adoption adoptionAValider       = Adoption.Create(animal, contact, date, statut);
 
                     // 9. Insérer
                     await dao.InsertAsync(adoptionAValider);
@@ -123,9 +112,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     if (adoptionAValider.Statut == "acceptee")
                     {
                         // 10. Création de l'objet sortie et insertion en DB
-                        Sortie nouvelleSortie = Sortie.Create(animal, contact, adoptionAValider.Date, "adoption");
-                        SortieDAO sortieDAO = new SortieDAO();
-                        await sortieDAO.InsertAsync(nouvelleSortie);
+                        Sortie      nouvelleSortie  = Sortie.Create(animal, contact, adoptionAValider.Date, "adoption");
+                        SortieDAO   sortieDAO       = new SortieDAO();
+                        await       sortieDAO.InsertAsync(nouvelleSortie);
                     }
 
                     continuer = false;
@@ -157,7 +146,6 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     string cible = AccesConsole.DemanderId("\nIntroduisez l'id de l'adoption à modifier");
 
-
                     Adoption adoptionAModifier = await dao.SelectByIdAsync(cible);
 
                     if (adoptionAModifier == null)
@@ -169,10 +157,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("2. Date");
                     Console.WriteLine("0. Annuler");
 
-                    int.TryParse(
-                        AccesConsole.LireChaine("Votre choix"),
-                        out int choix
-                    );
+                    int.TryParse(AccesConsole.LireChaine("Votre choix"),out int choix);
 
                     switch (choix)
                     {
@@ -252,11 +237,11 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 AccesConsole.AfficherListe(
                     liste,
                     adoption =>
-                        $"ID : {adoption.Identifiant} | " +
-                        $"Animal : {adoption.AnimalConcerne.Nom} ({adoption.AnimalConcerne.Identifiant}) | " +
-                        $"Contact : {adoption.ContactConcerne.Nom} {adoption.ContactConcerne.Prenom} | " +
-                        $"Date : {adoption.Date:yyyy-MM-dd} | " +
-                        $"Statut : {adoption.Statut}"
+                        $"ID        : {adoption.Identifiant} | " +
+                        $"Animal    : {adoption.AnimalConcerne.Nom} ({adoption.AnimalConcerne.Identifiant}) | " +
+                        $"Contact   : {adoption.ContactConcerne.Nom} {adoption.ContactConcerne.Prenom} | " +
+                        $"Date      : {adoption.Date:yyyy-MM-dd} | " +
+                        $"Statut    : {adoption.Statut}"
                 );
 
                 Console.WriteLine();

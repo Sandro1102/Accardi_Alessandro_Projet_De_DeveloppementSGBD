@@ -4,8 +4,6 @@
 //REMARQUE : CE PATERN SERVICE CREEE UN SINGLETON !!!!!!
 //-----------------------------------------------
 //Rappel la structure de création d'un singleton est : une propriété ou méthode static un constructeur privé un accès global à la classe via une seule instance !
-using System;
-
 namespace Accardi_Alessandro_Refuge.CouchePresentation
 {
     internal record Presentation

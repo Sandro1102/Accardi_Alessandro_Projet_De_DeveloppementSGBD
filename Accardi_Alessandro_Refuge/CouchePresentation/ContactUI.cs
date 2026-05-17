@@ -66,17 +66,17 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UNE PERSONNE DE CONTACT ===");
 
-                    string nom = AccesConsole.LireChaine("Nom");
-                    string prenom = AccesConsole.LireChaine("Prénom");
-                    string rn = AccesConsole.LireChaine("Registre national (ex : 95.06.13-123.45)");
-                    string rue = AccesConsole.LireChaine("Rue");
-                    string cp = AccesConsole.LireChaine("Code postal");
+                    string nom      = AccesConsole.LireChaine("Nom");
+                    string prenom   = AccesConsole.LireChaine("Prénom");
+                    string rn       = AccesConsole.LireChaine("Registre national (ex : 95.06.13-123.45)");
+                    string rue      = AccesConsole.LireChaine("Rue");
+                    string cp       = AccesConsole.LireChaine("Code postal");
                     string localite = AccesConsole.LireChaine("Localité");
-                    string gsm = AccesConsole.LireChaineOpt("GSM (optionnel)");
-                    string tel = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
-                    string email = AccesConsole.LireChaineOpt("Email (optionnel)");
+                    string gsm      = AccesConsole.LireChaineOpt("GSM (optionnel)");
+                    string tel      = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
+                    string email    = AccesConsole.LireChaineOpt("Email (optionnel)");
 
-                    nouveauContact = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
+                    nouveauContact  = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
 
                     await dao.InsertAsync(nouveauContact);
 

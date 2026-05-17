@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Accardi_Alessandro_Refuge.CoucheMetier;
 using Npgsql;
 
@@ -166,15 +161,15 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
         private Animal ConstruireAnimal(IDataReader reader)
         {
             Animal animal = Animal.Create(
-                GetStringSafe(reader, "ani_nom"),
-                GetStringSafe(reader, "ani_type"),
-                GetStringSafe(reader, "ani_sexe"),
-                GetValueOrDefault<bool>(reader, "ani_sterilise") ? "oui" : "non",
-                GetStringSafe(reader, "ani_particularites"),
-                GetStringSafe(reader, "ani_description"),
-                GetValueOrDefault<DateTime>(reader, "ani_date_naissance"),
-                GetDateTimeSafe(reader, "ani_date_deces"),          
-                GetDateTimeSafe(reader, "ani_date_sterilisation")   
+                GetStringSafe               (reader, "ani_nom"),
+                GetStringSafe               (reader, "ani_type"),
+                GetStringSafe               (reader, "ani_sexe"),
+                GetValueOrDefault<bool>     (reader, "ani_sterilise") ? "oui" : "non",
+                GetStringSafe               (reader, "ani_particularites"),
+                GetStringSafe               (reader, "ani_description"),
+                GetValueOrDefault<DateTime> (reader, "ani_date_naissance"),
+                GetDateTimeSafe             (reader, "ani_date_deces"),          
+                GetDateTimeSafe             (reader, "ani_date_sterilisation")   
             );
 
             animal.Identifiant = GetStringSafe(reader, "ani_identifiant");
@@ -196,9 +191,9 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
         protected override void AssignerParametreSQL(NpgsqlCommand cmd, Vaccination objet)
         {
-            cmd.Parameters.AddWithValue("@vaccination_date", objet.DateVaccination);
-            cmd.Parameters.AddWithValue("@vac_animal", objet.AnimalConcerne.Identifiant);
-            cmd.Parameters.AddWithValue("@id_vaccin", objet.VaccinApplique.Identifiant);
+            cmd.Parameters.AddWithValue("@vaccination_date",    objet.DateVaccination);
+            cmd.Parameters.AddWithValue("@vac_animal",          objet.AnimalConcerne.Identifiant);
+            cmd.Parameters.AddWithValue("@id_vaccin",           objet.VaccinApplique.Identifiant);
         }
     }
 }

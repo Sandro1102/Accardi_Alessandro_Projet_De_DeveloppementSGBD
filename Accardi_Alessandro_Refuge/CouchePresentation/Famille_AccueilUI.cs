@@ -36,22 +36,14 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 );
 
                 switch (choix)
-                {
-                    case 1:
-                        await EnregistrerDepart(dao);
-                        break;
+                { 
+                    case 1:await EnregistrerDepart(dao);             break;
 
-                    case 2:
-                        await EnregistrerRetour(dao);
-                        break;
+                    case 2:await EnregistrerRetour(dao);             break;
 
-                    case 3:
-                        await ListerFamillesAccueil(dao);
-                        break;
+                    case 3:await ListerFamillesAccueil(dao);         break;
 
-                    case 4:                                                        
-                        await ListerFamillesAccueilParAnimal(dao);                   
-                        break;
+                    case 4:await ListerFamillesAccueilParAnimal(dao);break;
 
                     case 0:
                         break;
@@ -81,9 +73,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("===== DÉPART EN FAMILLE D'ACCUEIL =====\n");
 
                     // 1. Lire et charger l'animal
-                    string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                    string      identifiantAnimal   = AccesConsole.LireChaine("Id de l'animal");
+                    AnimalDAO   daoAnimal           = new AnimalDAO();
+                    Animal      animal              = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable.");
@@ -98,9 +90,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                         throw new Exception("Cet animal est déjà en famille d'accueil.");
 
                     // 4. Lire et charger le contact
-                    string identifiantContact = AccesConsole.LireChaine("Registre national du contact");
-                    ContactDAO daoContact = new ContactDAO();
-                    Contact contact = await daoContact.SelectByRegistreAsync(identifiantContact);
+                    string      identifiantContact  = AccesConsole.LireChaine("Registre national du contact");
+                    ContactDAO  daoContact          = new ContactDAO();
+                    Contact     contact             = await daoContact.SelectByRegistreAsync(identifiantContact);
 
                     if (contact == null)
                         throw new Exception("Contact introuvable.");
@@ -113,9 +105,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     await dao.InsertAsync(nouvelleFa);
 
                     // 7. Créer la sortie correspondante
-                    SortieDAO daoSortie = new SortieDAO();
-                    Sortie nouvelleSortie = Sortie.Create(animal, contact, dateDepart, "famille_accueil");
-                    await daoSortie.InsertAsync(nouvelleSortie);
+                    SortieDAO   daoSortie       = new SortieDAO();
+                    Sortie      nouvelleSortie  = Sortie.Create(animal, contact, dateDepart, "famille_accueil");
+                    await       daoSortie.InsertAsync(nouvelleSortie);
 
                     Console.WriteLine("\nDépart en famille d'accueil enregistré avec succès !");
                     Console.ReadKey();
@@ -145,9 +137,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("===== RETOUR DE FAMILLE D'ACCUEIL =====\n");
 
                     // 1. Lire et charger l'animal
-                    string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                    string      identifiantAnimal   = AccesConsole.LireChaine("Id de l'animal");
+                    AnimalDAO   daoAnimal           = new AnimalDAO();
+                    Animal      animal              = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable.");
@@ -166,9 +158,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     await dao.UpdateAsync(faActive);
 
                     // 5. Créer l'entrée correspondante
-                    EntreeDAO daoEntree = new EntreeDAO();
-                    Entree nouvelleEntree = Entree.Create(animal, faActive.ContactConcerne, dateRetour, "retour_famille_accueil");
-                    await daoEntree.InsertAsync(nouvelleEntree);
+                    EntreeDAO   daoEntree       = new EntreeDAO();
+                    Entree      nouvelleEntree  = Entree.Create(animal, faActive.ContactConcerne, dateRetour, "retour_famille_accueil");
+                    await       daoEntree.InsertAsync(nouvelleEntree);
 
                     Console.WriteLine("\nRetour de famille d'accueil enregistré avec succès !");
                     Console.ReadKey();
@@ -205,11 +197,11 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 AccesConsole.AfficherListe(
                     liste,
                     fa =>
-                        $"ID : {fa.Identifiant} | " +
-                        $"Animal : {fa.AnimalConcerne.Nom} ({fa.AnimalConcerne.Identifiant}) | " +
-                        $"Contact : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
-                        $"Départ : {fa.Date:yyyy-MM-dd} | " +
-                        $"Retour : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"
+                        $"ID        : {fa.Identifiant} | " +
+                        $"Animal    : {fa.AnimalConcerne.Nom} ({fa.AnimalConcerne.Identifiant}) | " +
+                        $"Contact   : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
+                        $"Départ    : {fa.Date:yyyy-MM-dd} | " +
+                        $"Retour    : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"
                 );
 
                 Console.WriteLine();
@@ -235,8 +227,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                 string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
 
-                AnimalDAO daoAnimal = new AnimalDAO();
-                Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                AnimalDAO   daoAnimal   = new AnimalDAO();
+                Animal      animal      = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                 if (animal == null)
                     throw new Exception("Animal introuvable.");
@@ -255,10 +247,10 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 AccesConsole.AfficherListe(
                     liste,
                     fa =>
-                        $"ID : {fa.Identifiant} | " +
-                        $"Contact : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
-                        $"Départ : {fa.Date:yyyy-MM-dd} | " +
-                        $"Retour : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"
+                        $"ID        : {fa.Identifiant} | " +
+                        $"Contact   : {fa.ContactConcerne.Nom} {fa.ContactConcerne.Prenom} | " +
+                        $"Départ    : {fa.Date:yyyy-MM-dd} | " +
+                        $"Retour    : {(fa.DateFin.HasValue ? fa.DateFin.Value.ToString("yyyy-MM-dd") : "En cours")}"
                 );
 
                 Console.WriteLine();

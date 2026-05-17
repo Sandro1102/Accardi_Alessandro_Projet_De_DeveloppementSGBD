@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
+﻿using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
 using Accardi_Alessandro_Refuge.CoucheMetier;
 
 namespace Accardi_Alessandro_Refuge.CouchePresentation
@@ -41,12 +38,12 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                 switch (choix)
                 {
-                    case 1: await AjouterAnimal(animalDAO); break;
-                    case 2: await ConsulterAnimal(animalDAO); break;
-                    case 3: await SupprimerAnimal(animalDAO); break;
-                    case 4: await AjouterInformationAnimal(animalDAO); break;
-                    case 5: await SupprimerInformationAnimal(animalDAO); break;
-                    case 6: await ListerAnimaux(animalDAO); break;
+                    case 1: await AjouterAnimal(animalDAO);                          break;
+                    case 2: await ConsulterAnimal(animalDAO);                        break;
+                    case 3: await SupprimerAnimal(animalDAO);                        break;
+                    case 4: await AjouterInformationAnimal(animalDAO);               break;
+                    case 5: await SupprimerInformationAnimal(animalDAO);             break;
+                    case 6: await ListerAnimaux(animalDAO);                          break;
                     case 7: await EnregistrerDeces(animalDAO, entreeDAO, sortieDAO); break;
                     case 0: break;
                     default:
@@ -491,8 +488,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             }
 
             // 2. Affichage de la liste des personnes de contact
-            ContactDAO daoContact = new ContactDAO();
-            List<Contact> contacts = await daoContact.SelectAllAsync();
+            ContactDAO      daoContact = new ContactDAO();
+            List<Contact>   contacts   = await daoContact.SelectAllAsync();
 
             Console.WriteLine("\n=== PERSONNES DE CONTACT DISPONIBLES ===");
             Console.WriteLine("Registre national".PadRight(20) + " | " + "Nom".PadRight(15) + " | " + "Prénom".PadRight(15));
@@ -517,9 +514,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             DateTime dateEntree = AccesConsole.LireDate("Date d'entrée (yyyy-MM-dd)");
 
             // 6. Création de l'objet entrée et insertion en DB
-            Entree nouvelleEntree = Entree.Create(nouveauAnimal, contact, dateEntree, raison);
-            EntreeDAO daoEntree = new EntreeDAO();
-            await daoEntree.InsertAsync(nouvelleEntree);
+            Entree      nouvelleEntree  = Entree.Create(nouveauAnimal, contact, dateEntree, raison);
+            EntreeDAO   daoEntree       = new EntreeDAO();
+            await       daoEntree.InsertAsync(nouvelleEntree);
         }
     }
 }

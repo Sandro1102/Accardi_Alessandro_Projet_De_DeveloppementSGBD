@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
+﻿using Accardi_Alessandro_Refuge.CoucheBaseDeDonnees;
 using Accardi_Alessandro_Refuge.CoucheMetier;
 
 namespace Accardi_Alessandro_Refuge.CouchePresentation
@@ -29,24 +24,15 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.WriteLine("0. Retour");
                 Console.WriteLine("=============================");
 
-                int.TryParse(
-                    AccesConsole.LireChaine("Votre choix"),
-                    out choix
-                );
+                int.TryParse(AccesConsole.LireChaine("Votre choix"),out choix);
 
                 switch (choix)
                 {
-                    case 1:
-                        await EnregistrerVaccination(dao);
-                        break;
+                    case 1:await EnregistrerVaccination(dao);       break;
 
-                    case 2:
-                        await SupprimerVaccination(dao);
-                        break;
+                    case 2:await SupprimerVaccination(dao);         break;
 
-                    case 3:
-                        await ListerVaccinationsParAnimal(dao);
-                        break;
+                    case 3:await ListerVaccinationsParAnimal(dao);  break;
 
                     case 0:
                         break;
@@ -76,9 +62,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("===== ENREGISTRER UNE VACCINATION =====\n");
 
                     // 1. Charger l'animal
-                    string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                    string      identifiantAnimal   = AccesConsole.LireChaine("Id de l'animal");
+                    AnimalDAO   daoAnimal           = new AnimalDAO();
+                    Animal      animal              = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable.");
@@ -87,8 +73,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Animal.AnimalDecede(animal.DateDeDeces);
 
                     // 3. Afficher la liste des vaccins disponibles
-                    VaccinDAO daoVaccin = new VaccinDAO();
-                    List<Vaccin> vaccins = await daoVaccin.SelectAllAsync();
+                    VaccinDAO       daoVaccin   = new VaccinDAO();
+                    List<Vaccin>    vaccins     = await daoVaccin.SelectAllAsync();
 
                     if (vaccins == null || vaccins.Count == 0)
                         throw new Exception("Aucun vaccin disponible dans le système.");
@@ -155,9 +141,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.WriteLine("===== SUPPRIMER UNE VACCINATION =====\n");
 
                     // 1. Charger l'animal
-                    string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
-                    AnimalDAO daoAnimal = new AnimalDAO();
-                    Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                    string      identifiantAnimal   = AccesConsole.LireChaine("Id de l'animal");
+                    AnimalDAO   daoAnimal           = new AnimalDAO();
+                    Animal      animal              = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                     if (animal == null)
                         throw new Exception("Animal introuvable.");
@@ -175,11 +161,11 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         Console.WriteLine($"\nVaccinations de {animal.Nom} :\n");
 
-                        AccesConsole.AfficherListe(
-                            vaccinations,
-                            v =>
-                                $"Vaccin ID : {v.VaccinApplique.Identifiant} | " +
-                                $"Nom : {v.VaccinApplique.Nom} | " +
+                        AccesConsole.AfficherListe(                                 // J'ai une préférence pour la proposition de l'ia pour l'affichage console plus simple et plus direct que de
+                            vaccinations,                                           //créer une méthode dédie les six lignes à gauche sont l'équivalente de :
+                            v =>                                                    //string Formatter(Vaccination v)
+                                $"Vaccin ID : {v.VaccinApplique.Identifiant} | " +  //{return $"Vaccin ID : {v.VaccinApplique.Identifiant} | Nom : {v.VaccinApplique.Nom} | 
+                                $"Nom : {v.VaccinApplique.Nom} | " +                //Date : {v.DateVaccination:yyyy-MM-dd}";}
                                 $"Date : {v.DateVaccination:yyyy-MM-dd}"
                         );
 
@@ -225,9 +211,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 Console.Clear();
                 Console.WriteLine("===== VACCINATIONS PAR ANIMAL =====\n");
 
-                string identifiantAnimal = AccesConsole.LireChaine("Id de l'animal");
-                AnimalDAO daoAnimal = new AnimalDAO();
-                Animal animal = await daoAnimal.SelectByIdAsync(identifiantAnimal);
+                string identifiantAnimal    = AccesConsole.LireChaine("Id de l'animal");
+                AnimalDAO daoAnimal         = new AnimalDAO();
+                Animal animal               = await daoAnimal.SelectByIdAsync(identifiantAnimal);
 
                 if (animal == null)
                     throw new Exception("Animal introuvable.");
@@ -246,8 +232,8 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 AccesConsole.AfficherListe(
                     liste,
                     v =>
-                        $"Vaccin : {v.VaccinApplique.Nom} (ID : {v.VaccinApplique.Identifiant}) | " +
-                        $"Date : {v.DateVaccination:yyyy-MM-dd}"
+                        $"Vaccin :  {v.VaccinApplique.Nom} (ID : {v.VaccinApplique.Identifiant}) | " +
+                        $"Date :    {v.DateVaccination:yyyy-MM-dd}"
                 );
 
                 Console.WriteLine();

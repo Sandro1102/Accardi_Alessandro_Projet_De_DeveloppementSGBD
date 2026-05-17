@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Accardi_Alessandro_Refuge.CouchePresentation
+﻿namespace Accardi_Alessandro_Refuge.CouchePresentation
 {
     internal static class AccesConsole
     {
