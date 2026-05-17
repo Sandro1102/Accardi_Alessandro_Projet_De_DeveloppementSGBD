@@ -51,23 +51,26 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     a.description   AS ani_description, a.date_sterilisation AS ani_date_sterilisation,
                     a.sterilise     AS ani_sterilise, a.date_naissance AS ani_date_naissance,
                     -- Colonnes CONTACT (con_)
+                    c.contact_identifiant AS con_contact_id,
                     c.nom           AS con_nom, c.prenom AS con_prenom,
                     c.rue           AS con_rue, c.cp AS con_cp, c.localite AS con_localite,
                     c.registre_national AS con_registre_national, c.gsm AS con_gsm,
                     c.telephone     AS con_telephone, c.email AS con_email
                 FROM {NomDeLaTable} so
-                JOIN animal a ON so.ani_identifiant = a.identifiant
-                JOIN contact c ON so.sortie_contact = c.contact_identifiant";
+                JOIN animal a  ON so.ani_identifiant = a.identifiant
+                JOIN contact c ON so.sortie_contact  = c.contact_identifiant";
         }
+
+        // -------------------------------------------------------
 
         private string GetSortieMax()
         {
             return @"
-                    SELECT date_sortie
-                    FROM ani_sortie
-                    WHERE ani_identifiant = @id
-                    ORDER BY date_sortie DESC
-                    LIMIT 1;";
+                SELECT date_sortie
+                FROM ani_sortie
+                WHERE ani_identifiant = @id
+                ORDER BY date_sortie DESC
+                LIMIT 1";
         }
 
         public async Task<DateTime?> GetSortieMaxAsync(string identifiant)
@@ -95,7 +98,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             return retVal;
         }
 
-
+        // -------------------------------------------------------
 
         protected override Sortie ConvertirEnObjet(IDataReader reader)
         {
@@ -121,11 +124,12 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 GetStringSafe(reader, "ani_particularites"),
                 GetStringSafe(reader, "ani_description"),
                 GetValueOrDefault<DateTime>(reader, "ani_date_naissance"),
-                GetDateTimeSafe(reader, "ani_date_deces") ?? DateTime.MinValue,
-                GetDateTimeSafe(reader, "ani_date_sterilisation") ?? DateTime.MinValue
+                GetDateTimeSafe(reader, "ani_date_deces"),         
+                GetDateTimeSafe(reader, "ani_date_sterilisation")   
             );
 
             animal.Identifiant = GetStringSafe(reader, "ani_identifiant");
+
             return animal;
         }
 
@@ -133,10 +137,10 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
         private Contact ConstruireContact(IDataReader reader)
         {
-            return Contact.Create(
-                GetStringSafe(reader, "con_registre_national"),
+            Contact contact = Contact.Create(
                 GetStringSafe(reader, "con_nom"),
                 GetStringSafe(reader, "con_prenom"),
+                GetStringSafe(reader, "con_registre_national"),
                 GetStringSafe(reader, "con_rue"),
                 GetStringSafe(reader, "con_cp"),
                 GetStringSafe(reader, "con_localite"),
@@ -144,7 +148,13 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 GetStringSafe(reader, "con_telephone"),
                 GetStringSafe(reader, "con_email")
             );
+
+            contact.Identifiant = GetValueOrDefault<int>(reader, "con_contact_id"); 
+
+            return contact;
         }
+
+        // -------------------------------------------------------
 
         protected override void AssignerParametreSQL(NpgsqlCommand cmd, Sortie objet)
         {

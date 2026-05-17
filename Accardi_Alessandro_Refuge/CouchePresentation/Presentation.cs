@@ -46,7 +46,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
 
                     case 3: await AdoptionUI.Instance.MenuAdoptions();  break;
 
-                    //case 4: MenuFamillesAccueil(); break;
+                    case 4: await Famille_AccueilUI.Instance.MenuFamilleAccueil(); break;
 
                     //case 5: MenuVaccins(); break;
 
