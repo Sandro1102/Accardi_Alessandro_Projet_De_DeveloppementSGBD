@@ -51,6 +51,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                     a.description    AS ani_description, a.date_sterilisation AS ani_date_sterilisation,
                     a.sterilise      AS ani_sterilise, a.date_naissance AS ani_date_naissance,
                     -- Colonnes CONTACT (con_)
+                    c.contact_identifiant AS con_contact_id,
                     c.nom            AS con_nom, c.prenom AS con_prenom,
                     c.rue            AS con_rue, c.cp AS con_cp, c.localite AS con_localite,
                     c.registre_national AS con_registre_national, c.gsm AS con_gsm,
@@ -227,7 +228,7 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
 
         private Contact ConstruireContact(IDataReader reader)
         {
-            return Contact.Create(
+            Contact contact = Contact.Create(
                 GetStringSafe(reader, "con_nom"),                // J'ai rencontré une erreur que j'ai fréquemment produite dans le code. N'ayant pas respecté l'ordre des paramètres
                 GetStringSafe(reader, "con_prenom"),             // lors de l'appel registre national était envoyé à la propriété nom. Le nom ne pouvant contenir de chiffre il y avait
                 GetStringSafe(reader, "con_registre_national"),  // une levée d'exception ....
@@ -238,6 +239,10 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
                 GetStringSafe(reader, "con_telephone"),
                 GetStringSafe(reader, "con_email")
             );
+
+            contact.Identifiant = GetValueOrDefault<int>(reader, "con_contact_id");
+
+            return contact;
         }
 
         // -------------------------------------------------------
