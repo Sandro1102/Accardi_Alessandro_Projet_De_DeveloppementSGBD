@@ -178,20 +178,16 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         case 1:
 
-                            string nouveauStatut =
-                                AccesConsole.LireChaine("Nouveau statut");
+                            string nouveauStatut      = AccesConsole.LireChaine("Nouveau statut");
 
                             adoptionAModifier.Statut = nouveauStatut;
                             break;
 
                         case 2:
 
-                            DateTime nouvelleDate =
-                                AccesConsole.LireDate(
-                                    "Nouvelle date (yyyy-MM-dd)"
-                                );
+                            DateTime nouvelleDate    = AccesConsole.LireDate("Nouvelle date (yyyy-MM-dd)" );
 
-                            adoptionAModifier.Date = nouvelleDate;
+                            adoptionAModifier.Date   = nouvelleDate;
                             break;
 
                         case 0:
@@ -208,6 +204,16 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     }
 
                     await dao.UpdateAsync(adoptionAModifier);
+                    if (adoptionAModifier.Statut == "rejet_environnement" || adoptionAModifier.Statut == "rejet_comportement")
+                    {
+                        EntreeDAO   daoEntree   = new EntreeDAO();
+                        Animal      animal      = adoptionAModifier.AnimalConcerne;
+                        Contact     contact     = adoptionAModifier.ContactConcerne;
+
+                        Entree      nouvelleEntree = Entree.Create(animal, contact, DateTime.Today, "retour_adoption");
+                        
+                        await daoEntree.InsertAsync(nouvelleEntree);
+                    }
 
                     Console.WriteLine("\nAdoption modifiée avec succès !");
                     Console.ReadKey();
