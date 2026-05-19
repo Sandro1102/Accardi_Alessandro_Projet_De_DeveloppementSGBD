@@ -68,22 +68,27 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UN ANIMAL ===");
 
-                    string nom              = AccesConsole.LireChaine("Nom");
-                    string type             = AccesConsole.LireChaine("Type (chien/chat)");
-                    string sexe             = AccesConsole.LireChaine("Sexe (M/F)");
-                    string sterilise        = AccesConsole.LireChaine("Stérilisé (oui/non)");
-                    string particularite    = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
-                    string description      = AccesConsole.LireChaineOpt("Description (vide si aucune)");
-                    DateTime dateN          = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
-                    DateTime? dateD         = AccesConsole.LireDateOpt("Date de décès (yyyy-MM-dd vide si aucune)");
-                    DateTime? dateS         = AccesConsole.LireDateOpt("Date de stérilisation (yyyy-MM-dd vide si aucune)");
+                    string nom = AccesConsole.LireChaine("Nom");
+                    string type = AccesConsole.LireChaine("Type (chien/chat)");
+                    string sexe = AccesConsole.LireChaine("Sexe (M/F)");
+                    string sterilise = AccesConsole.LireChaine("Stérilisé (oui/non)");
+                    string particularite = AccesConsole.LireChaineOpt("Particularité (vide si aucune)");
+                    string description = AccesConsole.LireChaineOpt("Description (vide si aucune)");
+                    DateTime dateN = AccesConsole.LireDate("Date de naissance (yyyy-MM-dd)");
+                    DateTime? dateD = AccesConsole.LireDateOpt("Date de décès (yyyy-MM-dd vide si aucune)");
+                    DateTime? dateS = AccesConsole.LireDateOpt("Date de stérilisation (yyyy-MM-dd vide si aucune)");
 
-                    Animal nouveauAnimal    = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
+                    Animal nouveauAnimal = Animal.Create(nom, type, sexe, sterilise, particularite, description, dateN, dateD, dateS);
 
-                    Animal? animalTrouve    = await dao.ChercherAnimalIdentiqueAsync(nouveauAnimal.Nom, nouveauAnimal.Type, nouveauAnimal.DateDeNaissance, nouveauAnimal.DateDeSterilisation);
+                    Animal? animalTrouve = await dao.ChercherAnimalIdentiqueAsync(
+                        nouveauAnimal.Nom,
+                        nouveauAnimal.Type,
+                        nouveauAnimal.DateDeNaissance,
+                        nouveauAnimal.DateDeSterilisation
+                    );
 
                     if (animalTrouve != null && nouveauAnimal.EstIdentiqueA(animalTrouve))
-                        throw new Exception("\nCet animal existe déjà dans la base !");
+                        throw new Exception("Cet animal existe déjà dans la base !");
 
                     await dao.InsertAsync(nouveauAnimal);
 
@@ -95,7 +100,18 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     {
                         // Si l'insert dans la table entrée échoue l'animal est supprimé sinon il y a un animal orphelin dans la DB (sans raison d'entrée)
                         await dao.DeleteAsync(nouveauAnimal);
-                        throw; //relance l’erreur pour que le catch extérieur la gère
+                        throw; // relance l'erreur pour que le catch extérieur la gère
+                    }
+
+                    try
+                    {
+                        await EnregistrerCouleurs(nouveauAnimal);
+                    }
+                    catch
+                    {
+                        // Si l'insert des couleurs échoue l'animal est supprimé sinon il y a un animal orphelin dans la DB (sans couleur)
+                        await dao.DeleteAsync(nouveauAnimal);
+                        throw; // relance l'erreur pour que le catch extérieur la gère
                     }
 
                     Console.WriteLine($"\nAnimal '{nouveauAnimal.Nom}' ajouté avec succès (ID : {nouveauAnimal.Identifiant}).");
@@ -131,7 +147,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 if (animal == null)
                     Console.WriteLine("Aucun animal trouvé avec cet identifiant.");
                 else
-                    AfficherAnimal(animal);
+                    await AfficherAnimal(animal);
             }
             catch (Exception ex)
             {
@@ -160,7 +176,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 }
                 else
                 {
-                    AfficherAnimal(animal);
+                    await AfficherAnimal(animal);
 
                     if (AccesConsole.Confirmation($"Confirmer la suppression de '{animal.Nom}'"))
                     {
@@ -348,10 +364,9 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         // ============================
         //   AFFICHAGE D'UN ANIMAL
         // ============================
-        private void AfficherAnimal(Animal animal)
+        private async Task AfficherAnimal(Animal animal)
         {
             Console.WriteLine();
-
             Console.WriteLine($"  Identifiant        : {animal.Identifiant}");
             Console.WriteLine($"  Nom                : {animal.Nom}");
             Console.WriteLine($"  Type               : {animal.Type}");
@@ -367,6 +382,21 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine($"  Date naissance     : {dateNaissance}");
             Console.WriteLine($"  Date décès         : {dateDeces}");
             Console.WriteLine($"  Date stérilisation : {dateSteril}");
+
+            // Récupération et affichage des couleurs
+            CouleurDAO daoCouleur = new CouleurDAO();
+            Animal_CouleurDAO daoAnimalCouleur = new Animal_CouleurDAO();
+
+            List<Animal_CouleurDAO.AnimalCouleur> liens = await daoAnimalCouleur.SelectByAnimalAsync(animal.Identifiant);
+            List<Couleur> couleurs = await daoCouleur.SelectAllAsync();
+
+            List<string> nomsCouleursAnimal = liens
+                .Select(lien => couleurs.FirstOrDefault(c => c.Identifiant == lien.CouleurId)?.Nom ?? "?")
+                .ToList();
+
+            string affichageCouleurs = nomsCouleursAnimal.Count > 0 ? string.Join(", ", nomsCouleursAnimal) : "-";
+
+            Console.WriteLine($"  Couleurs           : {affichageCouleurs}");
         }
 
 
@@ -517,6 +547,72 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Entree      nouvelleEntree  = Entree.Create(nouveauAnimal, contact, dateEntree, raison);
             EntreeDAO   daoEntree       = new EntreeDAO();
             await       daoEntree.InsertAsync(nouvelleEntree);
+        }
+
+        /*************************************************************************************************
+         *                              ENREGISTREMENT DE(S) COULEUR(S) D UN ANIMAL                      *
+         *************************************************************************************************/
+
+        private async Task EnregistrerCouleurs(Animal animal)
+        {
+            CouleurDAO daoCouleur = new CouleurDAO();
+            Animal_CouleurDAO daoAnimalCouleur = new Animal_CouleurDAO();
+
+            List<Couleur> couleurs = await daoCouleur.SelectAllAsync();
+
+            if (couleurs == null || couleurs.Count == 0)
+                throw new Exception("Aucune couleur disponible dans le système.");
+
+            Console.WriteLine("\n=== COULEURS DISPONIBLES ===");
+            Console.WriteLine($"{"ID",-5} {"Nom",-20}");
+            Console.WriteLine(new string('-', 25));
+
+            foreach (Couleur c in couleurs)
+                Console.WriteLine($"{c.Identifiant,-5} {c.Nom,-20}");
+
+            List<int> couleursChoisies = new List<int>();
+            bool continuerSaisie = true;
+
+            Console.WriteLine("\nIntroduisez les ID des couleurs de l'animal (minimum 1).");
+            Console.WriteLine("Appuyez sur Entrée sans valeur pour terminer la saisie.\n");
+
+            while (continuerSaisie)
+            {
+                string saisie = AccesConsole.LireChaine("ID couleur");
+
+                if (string.IsNullOrWhiteSpace(saisie) && couleursChoisies.Count == 0)
+                {
+                    Console.WriteLine("Vous devez saisir au moins une couleur.");
+                }
+                else if (string.IsNullOrWhiteSpace(saisie))
+                {
+                    continuerSaisie = false;
+                }
+                else if (!int.TryParse(saisie, out int idCouleur))
+                {
+                    Console.WriteLine("L'identifiant doit être un nombre.");
+                }
+                else if (couleurs.FirstOrDefault(c => c.Identifiant == idCouleur) == null)
+                {
+                    Console.WriteLine("Couleur introuvable, veuillez choisir un ID dans la liste.");
+                }
+                else if (couleursChoisies.Contains(idCouleur))
+                {
+                    Console.WriteLine("Cette couleur a déjà été ajoutée.");
+                }
+                else
+                {
+                    couleursChoisies.Add(idCouleur);
+                    Couleur couleurChoisie = couleurs.First(c => c.Identifiant == idCouleur);
+                    Console.WriteLine($"Couleur '{couleurChoisie.Nom}' ajoutée.");
+                }
+            }
+
+            foreach (int idCouleur in couleursChoisies)
+            {
+                Animal_CouleurDAO.AnimalCouleur lien = new Animal_CouleurDAO.AnimalCouleur(animal.Identifiant, idCouleur);
+                await daoAnimalCouleur.InsertAsync(lien);
+            }
         }
     }
 }

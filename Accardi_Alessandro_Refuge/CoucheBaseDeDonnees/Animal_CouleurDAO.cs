@@ -67,5 +67,30 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             cmd.Parameters.AddWithValue("@col_identifiant", objet.CouleurId);
             cmd.Parameters.AddWithValue("@ani_identifiant", objet.AniIdentifiant);
         }
+
+        public async Task<List<AnimalCouleur>> SelectByAnimalAsync(string idAnimal)
+        {
+            List<AnimalCouleur> liste = new List<AnimalCouleur>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE ani_identifiant = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idAnimal);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                            liste.Add(ConvertirEnObjet(reader));
+                    }
+                }
+            }
+
+            return liste;
+        }
     }
 }
