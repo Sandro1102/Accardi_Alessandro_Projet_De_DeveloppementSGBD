@@ -40,6 +40,29 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             return SelectByAsync("registre_national", registre);
         }
 
+        public new async Task InsertAsync(Contact obj)
+        {
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                // RETURNING contact_identifiant permet de récupérer l'id généré par le SERIAL
+                string sql = @"INSERT INTO contact
+                        (nom, prenom, registre_national, rue, cp, localite, gsm, telephone, email)
+                       VALUES
+                        (@nom, @prenom, @registre_national, @rue, @cp, @localite, @gsm, @telephone, @email)
+                       RETURNING contact_identifiant";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    AssignerParametreSQL(cmd, obj);
+
+                    object result = await cmd.ExecuteScalarAsync();
+                    obj.Identifiant = Convert.ToInt32(result);  
+                }
+            }
+        }
+
 
         protected override Contact ConvertirEnObjet (IDataReader reader)
         { 

@@ -390,9 +390,11 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             List<Animal_CouleurDAO.AnimalCouleur> liens = await daoAnimalCouleur.SelectByAnimalAsync(animal.Identifiant);
             List<Couleur> couleurs = await daoCouleur.SelectAllAsync();
 
-            List<string> nomsCouleursAnimal = liens
-                .Select(lien => couleurs.FirstOrDefault(c => c.Identifiant == lien.CouleurId)?.Nom ?? "?")
+            List<string> nomsCouleursAnimal = liens                                                         
+                .Select(lien => couleurs.FirstOrDefault(c => c.Identifiant == lien.CouleurId)?.Nom ?? "?")  
                 .ToList();
+            //Cette partie du code permet de coder de manière plus courte qu'avec les boucles foreach                                                                                  
+            //Le "constructeur" record permet d'assigner les attibruts venant de la table animal_couleur (id couleur et id animal)
 
             string affichageCouleurs = nomsCouleursAnimal.Count > 0 ? string.Join(", ", nomsCouleursAnimal) : "-";
 

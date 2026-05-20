@@ -60,5 +60,29 @@ namespace Accardi_Alessandro_Refuge.CoucheBaseDeDonnees
             cmd.Parameters.AddWithValue("@pers_identifiant", obj.PersonneId);
             cmd.Parameters.AddWithValue("@rol_identifiant", obj.RoleId);
         }
+        public async Task<List<PersonneRole>> SelectByContactAsync(int idContact)
+        {
+            List<PersonneRole> liste = new List<PersonneRole>();
+
+            using (var connexion = ConnexionDB.GetConnexion())
+            {
+                await connexion.OpenAsync();
+
+                string sql = $"SELECT * FROM {NomDeLaTable} WHERE pers_identifiant = @id";
+
+                using (var cmd = new NpgsqlCommand(sql, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@id", idContact);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                            liste.Add(ConvertirEnObjet(reader));
+                    }
+                }
+            }
+
+            return liste;
+        }
     }
 }

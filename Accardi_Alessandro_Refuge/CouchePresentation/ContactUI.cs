@@ -66,19 +66,30 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     Console.Clear();
                     Console.WriteLine("=== AJOUTER UNE PERSONNE DE CONTACT ===");
 
-                    string nom      = AccesConsole.LireChaine("Nom");
-                    string prenom   = AccesConsole.LireChaine("Prénom");
-                    string rn       = AccesConsole.LireChaine("Registre national (ex : 95.06.13-123.45)");
-                    string rue      = AccesConsole.LireChaine("Rue");
-                    string cp       = AccesConsole.LireChaine("Code postal");
+                    string nom = AccesConsole.LireChaine("Nom");
+                    string prenom = AccesConsole.LireChaine("Prénom");
+                    string rn = AccesConsole.LireChaine("Registre national (ex : 95.06.13-123.45)");
+                    string rue = AccesConsole.LireChaine("Rue");
+                    string cp = AccesConsole.LireChaine("Code postal");
                     string localite = AccesConsole.LireChaine("Localité");
-                    string gsm      = AccesConsole.LireChaineOpt("GSM (optionnel)");
-                    string tel      = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
-                    string email    = AccesConsole.LireChaineOpt("Email (optionnel)");
+                    string gsm = AccesConsole.LireChaineOpt("GSM (optionnel)");
+                    string tel = AccesConsole.LireChaineOpt("Téléphone fixe (optionnel)");
+                    string email = AccesConsole.LireChaineOpt("Email (optionnel)");
 
-                    nouveauContact  = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
+                    nouveauContact = Contact.Create(nom, prenom, rn, rue, cp, localite, gsm, tel, email);
 
                     await dao.InsertAsync(nouveauContact);
+
+                    try
+                    {
+                        await EnregistrerRoles(nouveauContact);
+                    }
+                    catch
+                    {
+                        // Si l'insert des rôles échoue le contact est supprimé sinon il y a un contact orphelin dans la DB (sans rôle)
+                        await dao.DeleteAsync(nouveauContact);
+                        throw; // relance l'erreur pour que le catch extérieur la gère
+                    }
 
                     Console.WriteLine("\nContact ajouté avec succès !");
                     Console.ReadKey();
@@ -152,7 +163,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                     }
                     else
                     {
-                        AfficherContact(c);
+                        await AfficherContact(c);
 
                         Console.WriteLine("\nQuelle information souhaitez-vous modifier ?");
                         Console.WriteLine("1. Rue");
@@ -214,7 +225,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
                 }
                 else
                 {
-                    AfficherContact(c);
+                    await AfficherContact(c);
 
                     if (AccesConsole.Confirmation($"Confirmer la suppression de {c.Nom} {c.Prenom}"))
                     {
@@ -239,7 +250,7 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
         //   AFFICHAGE D'UN CONTACT
         // ============================
 
-        private void AfficherContact(Contact c)
+        private async Task AfficherContact(Contact c)
         {
             Console.WriteLine();
             Console.WriteLine($"  Identifiant        : {c.Identifiant}");
@@ -252,6 +263,83 @@ namespace Accardi_Alessandro_Refuge.CouchePresentation
             Console.WriteLine($"  GSM                : {c.Gsm ?? "-"}");
             Console.WriteLine($"  Téléphone fixe     : {c.Telephone ?? "-"}");
             Console.WriteLine($"  Email              : {c.Email ?? "-"}");
+
+            // Récupération et affichage des rôles
+            RoleDAO daoRole = new RoleDAO();
+            Personne_RoleDAO daoPersonneRole = new Personne_RoleDAO();
+
+            List<Personne_RoleDAO.PersonneRole> liens = await daoPersonneRole.SelectByContactAsync(c.Identifiant);
+            List<Role> roles = await daoRole.SelectAllAsync();
+
+            List<string> nomsRolesContact = liens
+                .Select(lien => roles.FirstOrDefault(r => r.Identifiant == lien.RoleId)?.Nom ?? "?")
+                .ToList();
+
+            string affichageRoles = nomsRolesContact.Count > 0 ? string.Join(", ", nomsRolesContact) : "-";
+
+            Console.WriteLine($"  Rôles              : {affichageRoles}");
+        }
+
+        private async Task EnregistrerRoles(Contact contact)
+        {
+            RoleDAO daoRole = new RoleDAO();
+            Personne_RoleDAO daoPersonneRole = new Personne_RoleDAO();
+
+            List<Role> roles = await daoRole.SelectAllAsync();
+
+            if (roles == null || roles.Count == 0)
+                throw new Exception("Aucun rôle disponible dans le système.");
+
+            Console.WriteLine("\n=== RÔLES DISPONIBLES ===");
+            Console.WriteLine($"{"ID",-5} {"Nom",-30}");
+            Console.WriteLine(new string('-', 35));
+
+            foreach (Role r in roles)
+                Console.WriteLine($"{r.Identifiant,-5} {r.Nom,-30}");
+
+            List<int> rolesChoisis = new List<int>();
+            bool continuerSaisie = true;
+
+            Console.WriteLine("\nIntroduisez les ID des rôles du contact (minimum 1).");
+            Console.WriteLine("Appuyez sur Entrée sans valeur pour terminer la saisie.\n");
+
+            while (continuerSaisie)
+            {
+                string saisie = AccesConsole.LireChaine("ID rôle");
+
+                if (string.IsNullOrWhiteSpace(saisie) && rolesChoisis.Count == 0)
+                {
+                    Console.WriteLine("Vous devez saisir au moins un rôle.");
+                }
+                else if (string.IsNullOrWhiteSpace(saisie))
+                {
+                    continuerSaisie = false;
+                }
+                else if (!int.TryParse(saisie, out int idRole))
+                {
+                    Console.WriteLine("L'identifiant doit être un nombre.");
+                }
+                else if (roles.FirstOrDefault(r => r.Identifiant == idRole) == null)
+                {
+                    Console.WriteLine("Rôle introuvable, veuillez choisir un ID dans la liste.");
+                }
+                else if (rolesChoisis.Contains(idRole))
+                {
+                    Console.WriteLine("Ce rôle a déjà été ajouté.");
+                }
+                else
+                {
+                    rolesChoisis.Add(idRole);
+                    Role roleChoisi = roles.First(r => r.Identifiant == idRole);
+                    Console.WriteLine($"Rôle '{roleChoisi.Nom}' ajouté.");
+                }
+            }
+
+            foreach (int idRole in rolesChoisis)
+            {
+                Personne_RoleDAO.PersonneRole lien = new Personne_RoleDAO.PersonneRole(contact.Identifiant, idRole);
+                await daoPersonneRole.InsertAsync(lien);
+            }
         }
     }
 }
